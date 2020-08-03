@@ -1,4 +1,8 @@
 
+###> IDE files ###
+.idea
+###< IDE files ###
+
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
