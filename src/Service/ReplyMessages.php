@@ -5,9 +5,19 @@ namespace App\Service;
 
 class ReplyMessages
 {
-    public const GREETING = "Hello, %s. I'll help you to find a job!\nSend me /vacancy to get started or /help to get a list of all commands.";
+    public const GREETING = "Salam, %s. Mən sənə iş tapmağa kömək edəcəm!\nBaşlamaq üçün mənə /vacancy və ya bütün komandaları görmək üçün /help göndər.";
 
-    public const VACANCY = "#%s Vacancy!\n\nTitle: %s\nCompany: %s\nSalary: %s";
+    public const VACANCY = "<b>%s</b>\n#%s\n\n<b>Şirkət:</b> %s\n<b>Əmək haqqı:</b> %s";
 
-    public const VACANCY_DESCRIPTION = "\nDescription:\n\n%s";
+    public const VACANCY_DESCRIPTION = "\n<b>Ətraflı:</b>\n\n%s";
+
+    public const DONT_UNDERSTAND = "Bağışla... Amma mən səni başa düşmədim.";
+
+    public const HELP = "Mən bu komandaları başa düşürəm:\n\n\n" .
+    "/start - Məni ilk dəfə görürsənsə burdan başla\n\n" .
+    "/help - Bu yazını göstərmək üçün\n\n" .
+    "/vacancy - Ən son 30 vakansiyadan birini seçib göstərirəm\n\n" .
+    "/credits - Mənim yaradıcılarım haqqında məlumat verəcəm\n\n" .
+    "/donate - Xərclərimi ödəmək üçün proqramçının dəstəyə ehtiyacı var.\n\n" .
+    "Bir <b>çox sağ ol</b> <i>kofesi</i> bəsdir &#x1F60A";
 }

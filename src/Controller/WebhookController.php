@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Service\Bot;
 use App\Service\CallbackService;
 use App\Service\CommandService;
+use App\Service\ReplyMessages;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -56,7 +57,7 @@ class WebhookController extends AbstractController
             $text = $message->text;
 
             if (!in_array($text, $this->command::COMMANDS)) {
-                $this->bot->sendMessage($message->chat->id, "Sorry... I don't understand you.");
+                $this->bot->sendMessage($message->chat->id, ReplyMessages::DONT_UNDERSTAND);
                 return new Response();
             }
 

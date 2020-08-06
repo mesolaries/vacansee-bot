@@ -4,6 +4,8 @@ namespace App\Service;
 
 
 use App\Service\Api\Vacansee;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 
 class CommandService
@@ -20,10 +22,13 @@ class CommandService
 
     private Vacansee $api;
 
-    public function __construct(Bot $bot, Vacansee $api)
+    private CacheInterface $cache;
+
+    public function __construct(Bot $bot, Vacansee $api, CacheInterface $cache)
     {
         $this->bot = $bot;
         $this->api = $api;
+        $this->cache = $cache;
     }
 
     public function __call($name, $arguments)
@@ -42,40 +47,51 @@ class CommandService
     public function help($message)
     {
         // todo
-        $this->bot->sendMessage($message->chat->id, 'This is a help message');
+        $this->bot->sendMessage($message->chat->id, ReplyMessages::HELP, 'HTML');
     }
 
     public function vacancy($message)
     {
-        $vacancies = $this->api->getVacancies();
+        // Caching vacancies
+        $vacancies = $this->cache->get(
+            'app.vacancies',
+            function (ItemInterface $item) {
+                $item->expiresAfter(3600);
+
+                return $this->api->getVacancies();
+            }
+        );
 
         $vacancy = $vacancies[mt_rand(0, count($vacancies) - 1)];
 
         $text =
-            sprintf(ReplyMessages::VACANCY, $vacancy->category, $vacancy->title, $vacancy->company, $vacancy->salary);
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $vacancy->category, $vacancy->company, $vacancy->salary);
         $keyboard = new InlineKeyboardMarkup(
             [
                 [
                     [
-                        'text' => "Read more",
-                        'callback_data' => json_encode(['command' => 'readmore', 'id' => $vacancy->id])
+                        'text' => "Ətrafı",
+                        'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id])
                     ],
-                    ['text' => "Link", 'url' => $vacancy->url]
+                    ['text' => "Mənbə", 'url' => $vacancy->url],
+                ],
+                [
+                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
                 ]
             ]
         );
-        $this->bot->sendMessage($message->chat->id, $text, null, false, null, $keyboard);
+        $this->bot->sendMessage($message->chat->id, $text, 'HTML', false, null, $keyboard);
     }
 
     public function credits($message)
     {
         // todo
-        $this->bot->sendMessage($message->chat->id, 'Here will be credits and other info about contributor');
+        $this->bot->sendMessage($message->chat->id, 'Hələ ki, bu komandanı başa düşmürəm... Amma öyrənirəm.');
     }
 
     public function donate($message)
     {
         // todo
-        $this->bot->sendMessage($message->chat->id, 'It will give a user link where he can donate');
+        $this->bot->sendMessage($message->chat->id, 'Hələ ki, bu komandanı başa düşmürəm... Amma öyrənirəm.');
     }
 }

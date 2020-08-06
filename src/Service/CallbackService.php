@@ -4,26 +4,29 @@ namespace App\Service;
 
 
 use App\Service\Api\Vacansee;
+use Symfony\Contracts\Cache\CacheInterface;
+use Symfony\Contracts\Cache\ItemInterface;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 
 class CallbackService
 {
     public const CALLBACKS = [
-        'readmore',
-        'readless',
+        'read_more',
+        'read_less',
+        'get_another',
     ];
 
     private Bot $bot;
 
     private Vacansee $api;
 
-    private HtmlConverter $converter;
+    private CacheInterface $cache;
 
-    public function __construct(Bot $bot, Vacansee $api, HtmlConverter $converter)
+    public function __construct(Bot $bot, Vacansee $api, CacheInterface $cache)
     {
         $this->bot = $bot;
         $this->api = $api;
-        $this->converter = $converter;
+        $this->cache = $cache;
     }
 
     public function __call($name, $arguments)
@@ -36,35 +39,56 @@ class CallbackService
 
     public function readMore($query, $message)
     {
-        $old_message = $message->text;
-
         $id = (int)$query->id;
 
-        $vacancy = $this->api->getVacancy($id);
+        // Caching a vacancy
+        $vacancy = $this->cache->get(
+            "app.vacancy$id",
+            function (ItemInterface $item) use ($id) {
+                $item->expiresAfter(3600);
+
+                return $this->api->getVacancy($id);
+            }
+        );
 
         $keyboard = new InlineKeyboardMarkup(
             [
                 [
                     [
-                        'text' => "Read less",
-                        'callback_data' => json_encode(['command' => 'readless', 'id' => $vacancy->id])
+                        'text' => "Gizlət",
+                        'callback_data' => json_encode(['command' => 'read_less', 'id' => $vacancy->id])
                     ],
-                    ['text' => "Link", 'url' => $vacancy->url]
+                    ['text' => "Mənbə", 'url' => $vacancy->url],
+                ],
+                [
+                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
                 ]
             ]
         );
 
-        $vacancy_description = $this->converter->convert(nl2br($vacancy->descriptionHtml));
+        $vacancy_description =
+            trim(
+                strip_tags(
+                    preg_replace("/<br ?\\/?>|<\\/?p ?>|<\\/?h[1-6] ?>/", "\n", $vacancy->descriptionHtml),
+                    ['b', 'strong', 'i', 'em', 'u', 'ins', 's', 'strike', 'del', 'a', 'code', 'pre']
+                )
+            );
 
-        $new_message = sprintf(ReplyMessages::VACANCY_DESCRIPTION, $vacancy_description);
-
-        $text = $old_message . $new_message;
+        $text =
+            sprintf(
+                ReplyMessages::VACANCY . ReplyMessages::VACANCY_DESCRIPTION,
+                $vacancy->title,
+                $vacancy->category,
+                $vacancy->company,
+                $vacancy->salary,
+                $vacancy_description
+            );
 
         $this->bot->editMessageText(
             $message->chat->id,
             $message->message_id,
             $text,
-            'Markdown',
+            'HTML',
             false,
             $keyboard
         );
@@ -74,28 +98,79 @@ class CallbackService
     {
         $id = (int)$query->id;
 
-        $vacancy = $this->api->getVacancy($id);
+        // Caching a vacancy
+        $vacancy = $this->cache->get(
+            "app.vacancy$id",
+            function (ItemInterface $item) use ($id) {
+                $item->expiresAfter(3600);
+
+                return $this->api->getVacancy($id);
+            }
+        );
 
         $keyboard = new InlineKeyboardMarkup(
             [
                 [
                     [
-                        'text' => "Read more",
-                        'callback_data' => json_encode(['command' => 'readmore', 'id' => $vacancy->id])
+                        'text' => "Ətraflı",
+                        'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id])
                     ],
-                    ['text' => "Link", 'url' => $vacancy->url]
+                    ['text' => "Mənbə", 'url' => $vacancy->url],
+                ],
+                [
+                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
                 ]
             ]
         );
 
         $text =
-            sprintf(ReplyMessages::VACANCY, $vacancy->category, $vacancy->title, $vacancy->company, $vacancy->salary);
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $vacancy->category, $vacancy->company, $vacancy->salary);
 
         $this->bot->editMessageText(
             $message->chat->id,
             $message->message_id,
             $text,
-            'Markdown',
+            'HTML',
+            false,
+            $keyboard
+        );
+    }
+
+    public function getAnother($query, $message)
+    {
+        // Caching vacancies
+        $vacancies = $this->cache->get(
+            'app.vacancies',
+            function (ItemInterface $item) {
+                $item->expiresAfter(3600);
+
+                return $this->api->getVacancies();
+            }
+        );
+
+        $vacancy = $vacancies[mt_rand(0, count($vacancies) - 1)];
+
+        $text =
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $vacancy->category, $vacancy->company, $vacancy->salary);
+        $keyboard = new InlineKeyboardMarkup(
+            [
+                [
+                    [
+                        'text' => "Ətraflı",
+                        'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id])
+                    ],
+                    ['text' => "Mənbə", 'url' => $vacancy->url],
+                ],
+                [
+                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
+                ]
+            ]
+        );
+        $this->bot->editMessageText(
+            $message->chat->id,
+            $message->message_id,
+            $text,
+            'HTML',
             false,
             $keyboard
         );

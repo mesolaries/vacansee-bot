@@ -56,7 +56,7 @@ class Vacansee
         $response = $this->http->request(
             'GET',
             $this->url,
-            ['headers' => ['Accept' => 'application/json'], 'query' => ['apikey' => $this->key]]
+            ['headers' => ['Accept' => 'application/json'], 'query' => ['apikey' => $this->key, 'order[createdAt]' => 'desc']]
         );
 
         return json_decode($response->getContent());

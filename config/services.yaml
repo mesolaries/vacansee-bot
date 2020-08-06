@@ -39,6 +39,3 @@ services:
         arguments:
             - '%vacansee_api_url%'
             - '%vacansee_api_key%'
-    App\Service\HtmlConverter:
-        arguments:
-            - { strip_tags: true, use_autolinks: false, hard_break: true }
