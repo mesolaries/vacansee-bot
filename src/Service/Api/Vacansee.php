@@ -11,15 +11,15 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 class Vacansee
 {
-    private string $url;
+    private array $urls;
 
     private string $key;
 
     private HttpClientInterface $http;
 
-    public function __construct(string $url, string $key, HttpClientInterface $http)
+    public function __construct(array $urls, string $key, HttpClientInterface $http)
     {
-        $this->url = $url;
+        $this->urls = $urls;
         $this->key = $key;
         $this->http = $http;
     }
@@ -37,7 +37,7 @@ class Vacansee
     {
         $response = $this->http->request(
             'GET',
-            $this->url . "/$id",
+            $this->urls['vacancy'] . "/$id",
             ['headers' => ['Accept' => 'application/json'], 'query' => ['apikey' => $this->key]]
         );
 
@@ -55,8 +55,25 @@ class Vacansee
     {
         $response = $this->http->request(
             'GET',
-            $this->url,
-            ['headers' => ['Accept' => 'application/json'], 'query' => ['apikey' => $this->key, 'order[createdAt]' => 'desc']]
+            $this->urls['vacancy'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => ['apikey' => $this->key, 'order[createdAt]' => 'desc']
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
+    public function getCategories()
+    {
+        $response = $this->http->request(
+            'GET',
+            $this->urls['category'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => ['apikey' => $this->key],
+            ]
         );
 
         return json_decode($response->getContent());

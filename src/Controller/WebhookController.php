@@ -54,7 +54,9 @@ class WebhookController extends AbstractController
 
         if (isset($content->message) || isset($content->edited_message)) {
             $message = @$content->message ?: $content->edited_message;
-            $text = $message->text;
+
+            // Remove everything after @ from message text (if exists). Return empty string if there's no message text at all
+            $text = @strtok($message->text, '@') ?: '';
 
             if (!in_array($text, $this->command::COMMANDS)) {
                 $this->bot->sendMessage($message->chat->id, ReplyMessages::DONT_UNDERSTAND);

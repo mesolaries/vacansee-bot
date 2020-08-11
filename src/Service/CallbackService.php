@@ -3,7 +3,9 @@
 namespace App\Service;
 
 
+use App\Entity\Bot\Chat;
 use App\Service\Api\Vacansee;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Cache\ItemInterface;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
@@ -14,6 +16,7 @@ class CallbackService
         'read_more',
         'read_less',
         'get_another',
+        'set_category',
     ];
 
     private Bot $bot;
@@ -22,11 +25,17 @@ class CallbackService
 
     private CacheInterface $cache;
 
-    public function __construct(Bot $bot, Vacansee $api, CacheInterface $cache)
+    /**
+     * @var EntityManagerInterface Entity Manager for default (bot) connection
+     */
+    private EntityManagerInterface $em;
+
+    public function __construct(Bot $bot, Vacansee $api, CacheInterface $cache, EntityManagerInterface $em)
     {
         $this->bot = $bot;
         $this->api = $api;
         $this->cache = $cache;
+        $this->em = $em;
     }
 
     public function __call($name, $arguments)
@@ -174,5 +183,26 @@ class CallbackService
             false,
             $keyboard
         );
+    }
+
+    public function setCategory($query, $message)
+    {
+        $categoryId = (int)$query->id;
+
+        $repository = $this->em->getRepository(Chat::class);
+
+        $chat = $repository->findOneBy(['chatId' => $message->chat->id]) ?? new Chat();
+
+        $chat->setTitle(@$message->chat->title);
+        $chat->setUsername(@$message->chat->username);
+        $chat->setFirstName(@$message->chat->first_name);
+        $chat->setType($message->chat->type);
+        $chat->setChatId($message->chat->id);
+        $chat->setVacancyCategoryId($categoryId);
+
+        $this->em->persist($chat);
+        $this->em->flush();
+
+        $this->bot->sendMessage($message->chat->id, ReplyMessages::CATEGORY_WAS_SET);
     }
 }

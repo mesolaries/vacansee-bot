@@ -14,6 +14,7 @@ class CommandService
         '/start',
         '/help',
         '/vacancy',
+        '/setcategory',
         '/credits',
         '/donate',
     ];
@@ -41,7 +42,11 @@ class CommandService
     public function start($message)
     {
         // todo
-        $this->bot->sendMessage($message->chat->id, sprintf(ReplyMessages::GREETING, $message->from->first_name));
+        $text = sprintf(ReplyMessages::GREETING . "\n\n" . ReplyMessages::CATEGORY_QUESTION, $message->from->first_name);
+
+        $keyboard = $this->getCategoriesInlineKeyboard();
+
+        $this->bot->sendMessage($message->chat->id, $text, 'HTML', false, null, $keyboard);
     }
 
     public function help($message)
@@ -83,6 +88,15 @@ class CommandService
         $this->bot->sendMessage($message->chat->id, $text, 'HTML', false, null, $keyboard);
     }
 
+    public function setCategory($message)
+    {
+        $text = sprintf(ReplyMessages::CATEGORY_QUESTION);
+
+        $keyboard = $this->getCategoriesInlineKeyboard();
+
+        $this->bot->sendMessage($message->chat->id, $text, 'HTML', false, null, $keyboard);
+    }
+
     public function credits($message)
     {
         // todo
@@ -93,5 +107,31 @@ class CommandService
     {
         // todo
         $this->bot->sendMessage($message->chat->id, 'Hələ ki, bu komandanı başa düşmürəm... Amma öyrənirəm.');
+    }
+
+    private function getCategoriesInlineKeyboard()
+    {
+        $categories = array_chunk($this->api->getCategories(), 3, true);
+
+        $buttons = [];
+
+        $row = 0;
+        foreach ($categories as $chunk) {
+            foreach ($chunk as $category) {
+                $buttons[$row][] =
+                    [
+                        'text' => $category->name,
+                        'callback_data' => json_encode(['command' => 'set_category', 'id' => $category->id])
+                    ];
+            }
+            $row++;
+        }
+
+        $buttons[$row][] =
+            ['text' => 'Hamısı', 'callback_data' => json_encode(['command' => 'set_category', 'id' => null])];
+
+        return new InlineKeyboardMarkup(
+            $buttons
+        );
     }
 }
