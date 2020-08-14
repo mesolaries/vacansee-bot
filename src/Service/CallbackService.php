@@ -25,17 +25,25 @@ class CallbackService
 
     private CacheInterface $cache;
 
+    private CommandService $botCommand;
+
     /**
      * @var EntityManagerInterface Entity Manager for default (bot) connection
      */
     private EntityManagerInterface $em;
 
-    public function __construct(Bot $bot, Vacansee $api, CacheInterface $cache, EntityManagerInterface $em)
-    {
+    public function __construct(
+        Bot $bot,
+        Vacansee $api,
+        CacheInterface $cache,
+        EntityManagerInterface $em,
+        CommandService $botCommand
+    ) {
         $this->bot = $bot;
         $this->api = $api;
         $this->cache = $cache;
         $this->em = $em;
+        $this->botCommand = $botCommand;
     }
 
     public function __call($name, $arguments)
@@ -60,6 +68,15 @@ class CallbackService
             }
         );
 
+        $salary = $vacancy->salary ?: 'Qeyd edilməyib';
+
+        $category = $this->api->getCategoryByUri($vacancy->category);
+
+        $categoryName = str_replace(' ', '', ucwords($category->name));
+
+        $categoryId = $category->id;
+
+
         $keyboard = new InlineKeyboardMarkup(
             [
                 [
@@ -70,7 +87,10 @@ class CallbackService
                     ['text' => "Mənbə", 'url' => $vacancy->url],
                 ],
                 [
-                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
+                    [
+                        'text' => "Başqasını göstər",
+                        'callback_data' => json_encode(['command' => 'get_another', 'categoryId' => $categoryId])
+                    ],
                 ]
             ]
         );
@@ -87,9 +107,9 @@ class CallbackService
             sprintf(
                 ReplyMessages::VACANCY . ReplyMessages::VACANCY_DESCRIPTION,
                 $vacancy->title,
-                $vacancy->category,
+                $categoryName,
                 $vacancy->company,
-                $vacancy->salary,
+                $salary,
                 $vacancy_description
             );
 
@@ -117,6 +137,14 @@ class CallbackService
             }
         );
 
+        $salary = $vacancy->salary ?: 'Qeyd edilməyib';
+
+        $category = $this->api->getCategoryByUri($vacancy->category);
+
+        $categoryName = str_replace(' ', '', ucwords($category->name));
+
+        $categoryId = $category->id;
+
         $keyboard = new InlineKeyboardMarkup(
             [
                 [
@@ -127,13 +155,16 @@ class CallbackService
                     ['text' => "Mənbə", 'url' => $vacancy->url],
                 ],
                 [
-                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
+                    [
+                        'text' => "Başqasını göstər",
+                        'callback_data' => json_encode(['command' => 'get_another', 'categoryId' => $categoryId])
+                    ],
                 ]
             ]
         );
 
         $text =
-            sprintf(ReplyMessages::VACANCY, $vacancy->title, $vacancy->category, $vacancy->company, $vacancy->salary);
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
 
         $this->bot->editMessageText(
             $message->chat->id,
@@ -147,42 +178,7 @@ class CallbackService
 
     public function getAnother($query, $message)
     {
-        // Caching vacancies
-        $vacancies = $this->cache->get(
-            'app.vacancies',
-            function (ItemInterface $item) {
-                $item->expiresAfter(3600);
-
-                return $this->api->getVacancies();
-            }
-        );
-
-        $vacancy = $vacancies[mt_rand(0, count($vacancies) - 1)];
-
-        $text =
-            sprintf(ReplyMessages::VACANCY, $vacancy->title, $vacancy->category, $vacancy->company, $vacancy->salary);
-        $keyboard = new InlineKeyboardMarkup(
-            [
-                [
-                    [
-                        'text' => "Ətraflı",
-                        'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id])
-                    ],
-                    ['text' => "Mənbə", 'url' => $vacancy->url],
-                ],
-                [
-                    ['text' => "Başqasını göstər", 'callback_data' => json_encode(['command' => 'get_another'])],
-                ]
-            ]
-        );
-        $this->bot->editMessageText(
-            $message->chat->id,
-            $message->message_id,
-            $text,
-            'HTML',
-            false,
-            $keyboard
-        );
+        return $this->botCommand->vacancy($message, true);
     }
 
     public function setCategory($query, $message)

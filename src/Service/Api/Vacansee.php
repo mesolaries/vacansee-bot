@@ -65,11 +65,53 @@ class Vacansee
         return json_decode($response->getContent());
     }
 
+    public function getVacanciesByCategory($categoryId)
+    {
+        $response = $this->http->request(
+            'GET',
+            $this->urls['vacancy'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => ['apikey' => $this->key, 'category.id' => $categoryId],
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
     public function getCategories()
     {
         $response = $this->http->request(
             'GET',
             $this->urls['category'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => ['apikey' => $this->key],
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
+    public function getCategoryById($id)
+    {
+        $response = $this->http->request(
+            'GET',
+            $this->urls['category'] . "/$id",
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => ['apikey' => $this->key],
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
+    public function getCategoryByUri($uri)
+    {
+        $response = $this->http->request(
+            'GET',
+            $this->urls['base'] . $uri,
             [
                 'headers' => ['Accept' => 'application/json'],
                 'query' => ['apikey' => $this->key],
