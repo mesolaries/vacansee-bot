@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Repository\Bot;
+namespace App\Repository;
 
-use App\Entity\Bot\Chat;
+use App\Entity\Chat;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 

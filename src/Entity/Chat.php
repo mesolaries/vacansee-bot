@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Entity\Bot;
+namespace App\Entity;
 
 use App\Repository\Bot\ChatRepository;
 use Doctrine\ORM\Mapping as ORM;

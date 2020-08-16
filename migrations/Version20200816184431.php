@@ -10,7 +10,7 @@ use Doctrine\Migrations\AbstractMigration;
 /**
  * Auto-generated Migration: Please modify to your needs!
  */
-final class Version20200811001735 extends AbstractMigration
+final class Version20200816184431 extends AbstractMigration
 {
     public function getDescription() : string
     {
@@ -20,15 +20,13 @@ final class Version20200811001735 extends AbstractMigration
     public function up(Schema $schema) : void
     {
         // this up() migration is auto-generated, please modify it to your needs
-        $this->addSql('ALTER TABLE chat ALTER chat_id TYPE BIGINT');
-        $this->addSql('ALTER TABLE chat ALTER chat_id DROP DEFAULT');
+        $this->addSql('CREATE UNIQUE INDEX UNIQ_F314E2B672F5A1AA ON channels (channel_id)');
     }
 
     public function down(Schema $schema) : void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->addSql('CREATE SCHEMA public');
-        $this->addSql('ALTER TABLE chat ALTER chat_id TYPE INT');
-        $this->addSql('ALTER TABLE chat ALTER chat_id DROP DEFAULT');
+        $this->addSql('DROP INDEX UNIQ_F314E2B672F5A1AA');
     }
 }

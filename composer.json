@@ -6,7 +6,7 @@
         "ext-ctype": "*",
         "ext-iconv": "*",
         "ext-json": "*",
-        "composer/package-versions-deprecated": "^1.10",
+        "composer/package-versions-deprecated": "1.10.99.1",
         "doctrine/doctrine-bundle": "^2.1",
         "doctrine/doctrine-migrations-bundle": "^3.0",
         "doctrine/orm": "^2.7",

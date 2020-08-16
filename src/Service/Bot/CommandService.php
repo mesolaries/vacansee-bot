@@ -3,7 +3,7 @@
 namespace App\Service\Bot;
 
 
-use App\Entity\Bot\Chat;
+use App\Entity\Chat;
 use App\Service\Api\Vacansee;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Contracts\Cache\CacheInterface;

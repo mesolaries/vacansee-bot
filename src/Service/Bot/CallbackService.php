@@ -3,7 +3,7 @@
 namespace App\Service\Bot;
 
 
-use App\Entity\Bot\Chat;
+use App\Entity\Chat;
 use App\Service\Api\Vacansee;
 use Doctrine\ORM\EntityManagerInterface;
 use Psr\Cache\InvalidArgumentException;
@@ -34,9 +34,6 @@ class CallbackService
 
     private CommandService $botCommand;
 
-    /**
-     * @var EntityManagerInterface Entity Manager for default (bot) connection
-     */
     private EntityManagerInterface $em;
 
     public function __construct(
