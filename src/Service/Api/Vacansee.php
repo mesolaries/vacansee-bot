@@ -105,7 +105,7 @@ class Vacansee
             self::URLS['category'],
             [
                 'headers' => ['Accept' => 'application/json'],
-                'query' => ['apikey' => $this->key],
+                'query' => ['apikey' => $this->key, 'order[id]' => 'asc'],
             ]
         );
 
