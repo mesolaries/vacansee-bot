@@ -2,10 +2,10 @@
 
 namespace App\Controller;
 
-use App\Service\Bot;
-use App\Service\CallbackService;
-use App\Service\CommandService;
-use App\Service\ReplyMessages;
+use App\Service\Bot\Bot;
+use App\Service\Bot\CallbackService;
+use App\Service\Bot\CommandService;
+use App\Service\Bot\ReplyMessages;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -24,8 +24,9 @@ class WebhookController extends AbstractController
     /**
      * WebhookController constructor.
      *
-     * @param Bot            $bot
-     * @param CommandService $command
+     * @param Bot             $bot
+     * @param CommandService  $command
+     * @param CallbackService $callback
      */
     public function __construct(Bot $bot, CommandService $command, CallbackService $callback)
     {

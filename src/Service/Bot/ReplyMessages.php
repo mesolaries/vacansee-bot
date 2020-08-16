@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Bot;
 
 
 class ReplyMessages
@@ -21,7 +21,8 @@ class ReplyMessages
     "/start - Məni ilk dəfə görürsənsə burdan başla\n\n" .
     "/help - Bu yazını göstərmək üçün\n\n" .
     "/vacancy - Ən son 30 vakansiyadan birini seçib göstərirəm\n\n" .
+    "/setcategory - Vakansiya kateqoriyasını dəyişmək üçün\n\n" .
     "/credits - Mənim yaradıcılarım haqqında məlumat verəcəm\n\n" .
     "/donate - Xərclərimi ödəmək üçün proqramçının dəstəyə ehtiyacı var.\n\n" .
-    "Bir <b>çox sağ ol</b> <i>kofesi</i> bəsdir &#x1F60A";
+    "Bir təşəkkür <i>kofesi ☕️</i> bəsdir &#x1F60A";
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\Bot;
 
 
 use App\Entity\Bot\Chat;
