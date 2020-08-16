@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\Bot\ChatRepository;
+use App\Repository\ChatRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
