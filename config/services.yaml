@@ -6,10 +6,6 @@
 parameters:
     telegram_bot_token: '%env(TELEGRAM_BOT_TOKEN)%'
     vacansee_api_key: '%env(VACANSEE_API_KEY)%'
-    vacansee_api_urls:
-        base: '%env(VACANSEE_API_URL_BASE)%'
-        vacancy: '%env(VACANSEE_API_URL_VACANCIES)%'
-        category: '%env(VACANSEE_API_URL_CATEGORIES)%'
 
 
 services:
@@ -41,5 +37,4 @@ services:
             - '%telegram_bot_token%'
     App\Service\Api\Vacansee:
         arguments:
-            - '%vacansee_api_urls%'
             - '%vacansee_api_key%'
