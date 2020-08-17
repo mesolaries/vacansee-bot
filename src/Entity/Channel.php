@@ -17,7 +17,8 @@ class Channel
      * Channels to be inserted to db
      */
     public const CHANNELS = [
-        // channelId => APICategoryUrl
+        // channelId => category slug
+        -1001253713550 => null
     ];
 
     /**
@@ -28,7 +29,7 @@ class Channel
     private $id;
 
     /**
-     * @ORM\Column(type="integer", unique=true)
+     * @ORM\Column(type="bigint", unique=true)
      */
     private $channelId;
 
@@ -38,9 +39,9 @@ class Channel
     private $vacancies;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, nullable=true)
      */
-    private $apiCategoryUrl;
+    private $categorySlug;
 
     public function __construct()
     {
@@ -95,14 +96,14 @@ class Channel
         return $this;
     }
 
-    public function getApiCategoryUrl(): ?string
+    public function getCategorySlug(): ?string
     {
-        return $this->apiCategoryUrl;
+        return $this->categorySlug;
     }
 
-    public function setApiCategoryUrl(string $apiCategoryUrl): self
+    public function setCategorySlug(?string $categorySlug): self
     {
-        $this->apiCategoryUrl = $apiCategoryUrl;
+        $this->categorySlug = $categorySlug;
 
         return $this;
     }

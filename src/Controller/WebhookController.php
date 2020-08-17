@@ -68,10 +68,11 @@ class WebhookController extends AbstractController
         } elseif (isset($content->callback_query)) {
             $message = $content->callback_query->message;
             $query = json_decode($content->callback_query->data);
+            $callbackQueryId = $content->callback_query->id;
             $text = $query->command;
 
             if (in_array($text, $this->callback::CALLBACKS)) {
-                $this->callback->$text($query, $message);
+                $this->callback->$text($query, $message, $callbackQueryId);
             }
         }
 

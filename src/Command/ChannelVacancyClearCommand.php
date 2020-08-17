@@ -2,16 +2,16 @@
 
 namespace App\Command;
 
-use App\Entity\Channel;
+use App\Entity\Vacancy;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class ChannelSyncCommand extends Command
+class ChannelVacancyClearCommand extends Command
 {
-    protected static $defaultName = 'app:channel:sync';
+    protected static $defaultName = 'app:channel:vacancy:clear';
 
     private EntityManagerInterface $em;
 
@@ -24,29 +24,27 @@ class ChannelSyncCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Syncs channels and API urls with Channel entity');
+            ->setDescription('Clear old vacancies from the database.');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-        $channels = Channel::CHANNELS;
+        $vacancyRepository = $this->em->getRepository(Vacancy::class);
 
-        $channelRepository = $this->em->getRepository(Channel::class);
+        $vacancies = $vacancyRepository->findSentVacanciesByGotDateTillThisMonth();
 
-        foreach ($channels as $id => $slug) {
-            $channel = $channelRepository->findOneBy(['channelId' => $id]) ?? new Channel();
+        $count = count($vacancies);
 
-            $channel->setChannelId($id);
-            $channel->setCategorySlug($slug);
-
-            $this->em->persist($channel);
+        foreach ($vacancies as $vacancy) {
+            $this->em->remove($vacancy);
         }
 
         $this->em->flush();
 
-        $io->success('Channels successfully synced with DB.');
+        $io->note("Cleared $count vacancies");
+        $io->success('The database cleared successfully!');
 
         return 0;
     }

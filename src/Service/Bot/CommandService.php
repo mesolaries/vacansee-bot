@@ -131,7 +131,7 @@ class CommandService
                     return $this->api->getVacancies();
                 }
 
-                return $this->api->getVacanciesByCategory($categoryId);
+                return $this->api->getVacanciesByCategoryId($categoryId, ['order[createdAt]' => 'desc']);
             }
         );
 
@@ -144,7 +144,7 @@ class CommandService
             function (ItemInterface $item) use ($vacancy) {
                 $item->expiresAfter(3600 * 24);
 
-                return str_replace(' ', '', ucwords($this->api->getCategoryByUri($vacancy->category)->name));
+                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
             }
         );
 

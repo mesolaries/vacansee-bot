@@ -12,9 +12,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class Vacansee
 {
     private const URLS = [
-        'base' => 'http://localhost:8001',
-        'vacancy' => 'http://localhost:8001/api/vacancies',
-        'category' => 'http://localhost:8001/api/categories',
+        'base' => 'http://localhost:8000',
+        'vacancy' => 'http://localhost:8000/api/vacancies',
+        'category' => 'http://localhost:8000/api/categories',
     ];
 
     private string $key;
@@ -48,28 +48,7 @@ class Vacansee
     }
 
     /**
-     * @return mixed
-     * @throws ClientExceptionInterface
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     */
-    public function getVacancies()
-    {
-        $response = $this->http->request(
-            'GET',
-            self::URLS['vacancy'],
-            [
-                'headers' => ['Accept' => 'application/json'],
-                'query' => ['apikey' => $this->key, 'order[createdAt]' => 'desc']
-            ]
-        );
-
-        return json_decode($response->getContent());
-    }
-
-    /**
-     * @param $categoryId
+     * @param array $query
      *
      * @return mixed
      * @throws ClientExceptionInterface
@@ -77,14 +56,15 @@ class Vacansee
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getVacanciesByCategory($categoryId)
+    public function getVacancies(array $query = [])
     {
+        $query['apikey'] = $this->key;
         $response = $this->http->request(
             'GET',
             self::URLS['vacancy'],
             [
                 'headers' => ['Accept' => 'application/json'],
-                'query' => ['apikey' => $this->key, 'category.id' => $categoryId],
+                'query' => $query
             ]
         );
 
@@ -92,20 +72,78 @@ class Vacansee
     }
 
     /**
+     * @param int   $categoryId
+     * @param array $query
+     *
      * @return mixed
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getCategories()
+    public function getVacanciesByCategoryId(int $categoryId, array $query = [])
     {
+        $query['apikey'] = $this->key;
+        $query['category.id'] = $categoryId;
+
+        $response = $this->http->request(
+            'GET',
+            self::URLS['vacancy'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => $query,
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
+    /**
+     * @param string $categorySlug
+     * @param array  $query
+     *
+     * @return mixed
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function getVacanciesByCategorySlug(string $categorySlug, array $query = [])
+    {
+        $query['apikey'] = $this->key;
+        $query['category.slug'] = $categorySlug;
+
+        $response = $this->http->request(
+            'GET',
+            self::URLS['vacancy'],
+            [
+                'headers' => ['Accept' => 'application/json'],
+                'query' => $query,
+            ]
+        );
+
+        return json_decode($response->getContent());
+    }
+
+    /**
+     * @param array $query
+     *
+     * @return mixed
+     * @throws ClientExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     */
+    public function getCategories(array $query = [])
+    {
+        $query['apikey'] = $this->key;
+
         $response = $this->http->request(
             'GET',
             self::URLS['category'],
             [
                 'headers' => ['Accept' => 'application/json'],
-                'query' => ['apikey' => $this->key, 'order[id]' => 'asc'],
+                'query' => $query,
             ]
         );
 
@@ -136,7 +174,8 @@ class Vacansee
     }
 
     /**
-     * @param $uri
+     * @param string $uri
+     * @param array  $query
      *
      * @return mixed
      * @throws ClientExceptionInterface
@@ -144,14 +183,16 @@ class Vacansee
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      */
-    public function getCategoryByUri($uri)
+    public function getResourceByUri(string $uri, array $query = [])
     {
+        $query['apikey'] = $this->key;
+
         $response = $this->http->request(
             'GET',
             self::URLS['base'] . $uri,
             [
                 'headers' => ['Accept' => 'application/json'],
-                'query' => ['apikey' => $this->key],
+                'query' => $query,
             ]
         );
 

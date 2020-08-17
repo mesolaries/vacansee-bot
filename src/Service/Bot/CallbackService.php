@@ -65,55 +65,60 @@ class CallbackService
     /**
      * @param $query
      * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
      * @throws InvalidArgumentException
      */
-    public function readMore($query, $message)
+    public function readMore($query, $message, $callbackQueryId)
     {
-        return $this->updateVacancyText($query, $message, true);
+        return $this->updateVacancyText($query, $message, $callbackQueryId, true);
     }
 
     /**
      * @param $query
      * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
      * @throws InvalidArgumentException
      */
-    public function readLess($query, $message)
+    public function readLess($query, $message, $callbackQueryId)
     {
-        return $this->updateVacancyText($query, $message);
+        return $this->updateVacancyText($query, $message, $callbackQueryId);
     }
 
     /**
      * @param $query
      * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
+     * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
-     * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
      * @throws TransportExceptionInterface
      * @throws \TelegramBot\Api\InvalidArgumentException
      */
-    public function getAnother($query, $message)
+    public function getAnother($query, $message, $callbackQueryId)
     {
+        $this->bot->answerCallbackQuery($callbackQueryId);
         return $this->botCommand->vacancy($message, true);
     }
 
     /**
      * @param $query
      * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
-     * @throws InvalidArgumentException
      * @throws Exception
+     * @throws InvalidArgumentException
      * @throws \TelegramBot\Api\InvalidArgumentException
      */
-    public function setCategory($query, $message)
+    public function setCategory($query, $message, $callbackQueryId)
     {
         $categoryId = (int)$query->id;
 
@@ -133,18 +138,21 @@ class CallbackService
 
         $this->cache->delete('app.chat.' . $message->chat->id);
 
+        $this->bot->answerCallbackQuery($callbackQueryId);
+
         return $this->bot->sendMessage($message->chat->id, ReplyMessages::CATEGORY_WAS_SET);
     }
 
     /**
      * @param      $query
      * @param      $message
+     * @param      $callbackQueryId
      * @param bool $expand
      *
      * @return Message
      * @throws InvalidArgumentException
      */
-    private function updateVacancyText($query, $message, $expand = false)
+    private function updateVacancyText($query, $message, $callbackQueryId, $expand = false)
     {
         $id = (int)$query->id;
 
@@ -166,7 +174,7 @@ class CallbackService
             function (ItemInterface $item) use ($vacancy) {
                 $item->expiresAfter(3600 * 24);
 
-                return str_replace(' ', '', ucwords($this->api->getCategoryByUri($vacancy->category)->name));
+                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
             }
         );
 
@@ -196,6 +204,8 @@ class CallbackService
             $text =
                 sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
         }
+
+        $this->bot->answerCallbackQuery($callbackQueryId);
 
         return $this->bot->editMessageText(
             $message->chat->id,

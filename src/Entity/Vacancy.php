@@ -20,9 +20,9 @@ class Vacancy
     private $id;
 
     /**
-     * @ORM\Column(type="string", length=255)
+     * @ORM\Column(type="string", length=255, unique=true)
      */
-    private $vacancyUri;
+    private $vacancyId;
 
     /**
      * @ORM\Column(type="boolean")
@@ -50,14 +50,14 @@ class Vacancy
         return $this->id;
     }
 
-    public function getVacancyUri(): ?string
+    public function getVacancyId(): ?string
     {
-        return $this->vacancyUri;
+        return $this->vacancyId;
     }
 
-    public function setVacancyId(string $vacancyUri): self
+    public function setVacancyId(string $vacancyId): self
     {
-        $this->vacancyUri = $vacancyUri;
+        $this->vacancyId = $vacancyId;
 
         return $this;
     }
