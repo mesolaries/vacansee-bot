@@ -17,7 +17,7 @@ class Channel
      * Channels to be inserted to db
      */
     public const CHANNELS = [
-
+        // channelId => APICategoryUrl
     ];
 
     /**
@@ -36,6 +36,11 @@ class Channel
      * @ORM\OneToMany(targetEntity=Vacancy::class, mappedBy="channel", orphanRemoval=true)
      */
     private $vacancies;
+
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $apiCategoryUrl;
 
     public function __construct()
     {
@@ -86,6 +91,18 @@ class Channel
                 $vacancy->setChannel(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getApiCategoryUrl(): ?string
+    {
+        return $this->apiCategoryUrl;
+    }
+
+    public function setApiCategoryUrl(string $apiCategoryUrl): self
+    {
+        $this->apiCategoryUrl = $apiCategoryUrl;
 
         return $this;
     }

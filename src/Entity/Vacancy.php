@@ -2,7 +2,7 @@
 
 namespace App\Entity;
 
-use App\Repository\Channel\VacancyRepository;
+use App\Repository\VacancyRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
@@ -20,9 +20,9 @@ class Vacancy
     private $id;
 
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="string", length=255)
      */
-    private $vacancyId;
+    private $vacancyUri;
 
     /**
      * @ORM\Column(type="boolean")
@@ -50,14 +50,14 @@ class Vacancy
         return $this->id;
     }
 
-    public function getVacancyId(): ?int
+    public function getVacancyUri(): ?string
     {
-        return $this->vacancyId;
+        return $this->vacancyUri;
     }
 
-    public function setVacancyId(int $vacancyId): self
+    public function setVacancyId(string $vacancyUri): self
     {
-        $this->vacancyId = $vacancyId;
+        $this->vacancyUri = $vacancyUri;
 
         return $this;
     }
