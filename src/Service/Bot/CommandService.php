@@ -199,8 +199,7 @@ class CommandService
      */
     public function credits($message)
     {
-        // todo
-        return $this->bot->sendMessage($message->chat->id, 'Hələ ki, bu komandanı başa düşmürəm... Amma öyrənirəm.');
+        return $this->bot->sendMessage($message->chat->id, ReplyMessages::CREDITS, 'HTML');
     }
 
     /**
@@ -212,8 +211,7 @@ class CommandService
      */
     public function donate($message)
     {
-        // todo
-        return $this->bot->sendMessage($message->chat->id, 'Hələ ki, bu komandanı başa düşmürəm... Amma öyrənirəm.');
+        return $this->bot->sendMessage($message->chat->id, sprintf(ReplyMessages::DONATE, $message->from->first_name));
     }
 
     /**
