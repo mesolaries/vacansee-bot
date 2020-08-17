@@ -25,33 +25,28 @@ class VacancyRepository extends ServiceEntityRepository
         $from = new \DateTime($date->format("Y-m-d") . " 00:00:00");
         $to = new \DateTime($date->format("Y-m-d") . " 23:59:59");
 
-        $qb = $this->createQueryBuilder("v");
-        $qb
+        return $this->createQueryBuilder('v')
             ->select('v.vacancyId')
             ->andWhere('v.gotAt BETWEEN :from AND :to')
             ->andWhere('v.channel = :channel')
             ->setParameter('from', $from)
             ->setParameter('to', $to)
-            ->setParameter('channel', $channel);
-        return $qb->getQuery()->getArrayResult();
+            ->setParameter('channel', $channel)
+            ->getQuery()
+            ->getArrayResult();
     }
 
-    public function findOneByGotDateChannelAndIsSent(\DateTime $date, Channel $channel, $isSent = false)
+    public function findOneNotSentVacancyByChannel(Channel $channel, $isSent = false)
     {
-        $from = new \DateTime($date->format("Y-m-d") . " 00:00:00");
-        $to = new \DateTime($date->format("Y-m-d") . " 23:59:59");
-
-        $qb = $this->createQueryBuilder("v");
-        $qb
-            ->andWhere('v.gotAt BETWEEN :from AND :to')
+        return $this->createQueryBuilder('v')
             ->andWhere('v.channel = :channel')
             ->andWhere('v.isSent = :isSent')
             ->orderBy('v.gotAt', 'ASC')
-            ->setParameter('from', $from)
-            ->setParameter('to', $to)
             ->setParameter('channel', $channel)
-            ->setParameter('isSent', $isSent);
-        return $qb->setMaxResults(1)->getQuery()->getOneOrNullResult();
+            ->setParameter('isSent', $isSent)
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getOneOrNullResult();
     }
 
     public function findSentVacanciesByGotDateTillThisMonth()
@@ -61,7 +56,8 @@ class VacancyRepository extends ServiceEntityRepository
             ->andWhere('v.gotAt < :thisMonth')
             ->setParameter('isSent', true)
             ->setParameter('thisMonth', new \DateTime('first day of this month'))
-            ->getQuery()->getResult();
+            ->getQuery()
+            ->getResult();
     }
 
     // /**

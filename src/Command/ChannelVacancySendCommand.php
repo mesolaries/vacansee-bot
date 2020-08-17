@@ -75,7 +75,7 @@ class ChannelVacancySendCommand extends Command
                 continue;
             }
 
-            $vacancy = $vacancyRepository->findOneByGotDateChannelAndIsSent(new \DateTime(), $channel);
+            $vacancy = $vacancyRepository->findOneNotSentVacancyByChannel($channel);
 
             if (!$vacancy) {
                 $io->note("No new vacancies found for $channelId channel. Continuing with the next channel...");
