@@ -18,7 +18,7 @@ class Channel
      */
     public const CHANNELS = [
         // channelId => category slug
-        -1001253713550 => null,
+        -1001327961017 => null,
         -1001356873598 => 'it',
     ];
 
