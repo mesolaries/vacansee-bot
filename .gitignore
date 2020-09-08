@@ -12,3 +12,7 @@
 /var/
 /vendor/
 ###< symfony/framework-bundle ###
+
+###> user defined ignores ###
+.htaccess
+###< user defined ignores ###
