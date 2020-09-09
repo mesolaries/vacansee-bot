@@ -1,6 +1,6 @@
 # Vacansee API
 
-Vacansee Bot is a Telegram bot which sends users vacancies from [Vacansee API](https://github.com/mesolaries/vacansee-api).
+Vacansee Bot is a Telegram bot which sends vacancies to users via [Vacansee API](https://github.com/mesolaries/vacansee-api).
 
 ## Deploying
 
