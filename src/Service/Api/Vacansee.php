@@ -12,9 +12,9 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class Vacansee
 {
     private const URLS = [
-        'base' => 'https://vacancy.xyz',
-        'vacancy' => 'https://vacancy.xyz/api/vacancies',
-        'category' => 'https://vacancy.xyz/api/categories',
+        'base' => 'https://vacansee.xyz',
+        'vacancy' => 'https://vacansee.xyz/api/vacancies',
+        'category' => 'https://vacansee.xyz/api/categories',
     ];
 
     private string $key;
