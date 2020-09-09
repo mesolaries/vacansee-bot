@@ -14,5 +14,5 @@
 ###< symfony/framework-bundle ###
 
 ###> user defined ignores ###
-.htaccess
+/.htaccess
 ###< user defined ignores ###
