@@ -24,7 +24,7 @@ class ChannelSyncCommand extends Command
     protected function configure()
     {
         $this
-            ->setDescription('Syncs channels and API urls with Channel entity');
+            ->setDescription('Syncs channels IDs and channel categories with Channel entity');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
