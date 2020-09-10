@@ -19,6 +19,10 @@ class ReplyMessages
 
     public const NO_VACANCIES = "Hal-hazırda vakansiya yoxdur. Bir qədər sonra yenidən yoxla.";
 
+    public const NO_NEXT_VACANCY = "Növbəti vakansiya yoxdur.";
+
+    public const NO_PREV_VACANCY = "Əvvəlki vakansiya yoxdur.";
+
     public const DONATE = "%s, mənə dəstək olmaq üçün aşağıdakı linkə keçid et və istədiyin məbləği göndər.\n\n" .
     "https://yasobe.ru/na/donate_vacansee\n\n" .
     "Dəstəyin üçün təşəkkür edirəm!";
@@ -32,7 +36,7 @@ class ReplyMessages
     public const HELP = "Mən bu komandaları başa düşürəm:\n\n\n" .
     "/start - Məni ilk dəfə görürsənsə burdan başla\n\n" .
     "/help - Bu yazını göstərmək üçün\n\n" .
-    "/vacancy - Ən son 30 vakansiyadan birini seçib göstərirəm\n\n" .
+    "/vacancy - Son həftə ərazində paylaşılan vakansiyaları göndərəcəm\n\n" .
     "/setcategory - Vakansiya kateqoriyasını dəyişmək üçün\n\n" .
     "/credits - Mənim yaradıcılarım haqqında məlumat verəcəm\n\n" .
     "/donate - Xərclərimi ödəmək üçün proqramçının dəstəyə ehtiyacı var.\n\n" .

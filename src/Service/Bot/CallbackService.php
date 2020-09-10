@@ -14,7 +14,6 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use TelegramBot\Api\Exception;
-use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 use TelegramBot\Api\Types\Message;
 
 class CallbackService
@@ -22,8 +21,9 @@ class CallbackService
     public const CALLBACKS = [
         'read_more',
         'read_less',
-        'get_another',
-        'set_category',
+        'save_user_category',
+        'next',
+        'prev',
     ];
 
     private Bot $bot;
@@ -63,48 +63,30 @@ class CallbackService
 
 
     /**
-     * @param $query
-     * @param $message
-     * @param $callbackQueryId
+     * @param       $query
+     * @param       $message
+     * @param       $callbackQueryId
      *
-     * @return Message
+     * @return bool
      * @throws InvalidArgumentException
      */
     public function readMore($query, $message, $callbackQueryId)
     {
-        return $this->updateVacancyText($query, $message, $callbackQueryId, true);
+        $this->toggleVacancyText($query, $message, $callbackQueryId, true);
+        return $this->bot->answerCallbackQuery($callbackQueryId);
     }
 
     /**
-     * @param $query
-     * @param $message
-     * @param $callbackQueryId
+     * @param     $query
+     * @param     $message
+     * @param     $callbackQueryId
      *
-     * @return Message
+     * @return bool
      * @throws InvalidArgumentException
      */
     public function readLess($query, $message, $callbackQueryId)
     {
-        return $this->updateVacancyText($query, $message, $callbackQueryId);
-    }
-
-    /**
-     * @param $query
-     * @param $message
-     * @param $callbackQueryId
-     *
-     * @return bool
-     * @throws ClientExceptionInterface
-     * @throws Exception
-     * @throws InvalidArgumentException
-     * @throws RedirectionExceptionInterface
-     * @throws ServerExceptionInterface
-     * @throws TransportExceptionInterface
-     * @throws \TelegramBot\Api\InvalidArgumentException
-     */
-    public function getAnother($query, $message, $callbackQueryId)
-    {
-        $this->botCommand->vacancy($message, true);
+        $this->toggleVacancyText($query, $message, $callbackQueryId, false);
         return $this->bot->answerCallbackQuery($callbackQueryId);
     }
 
@@ -113,12 +95,58 @@ class CallbackService
      * @param $message
      * @param $callbackQueryId
      *
+     * @return bool|Message
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     */
+    public function next($query, $message, $callbackQueryId)
+    {
+        $page = (int)$query->page;
+
+        return $this->changeVacancy($message, $callbackQueryId, $page);
+    }
+
+    /**
+     * @param $query
+     * @param $message
+     * @param $callbackQueryId
+     *
+     * @return bool|Message
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \TelegramBot\Api\InvalidArgumentException
+     */
+    public function prev($query, $message, $callbackQueryId)
+    {
+        $page = (int)$query->page;
+
+        if ($page < 1) {
+            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_PREV_VACANCY);
+        }
+
+        return $this->changeVacancy($message, $callbackQueryId, $page);
+    }
+
+    /**
+     * @param $query
+     * @param $message
+     * @param $callbackQueryId
+     *
      * @return Message
      * @throws Exception
      * @throws InvalidArgumentException
      * @throws \TelegramBot\Api\InvalidArgumentException
      */
-    public function setCategory($query, $message, $callbackQueryId)
+    public function saveUserCategory($query, $message, $callbackQueryId)
     {
         $categoryId = (int)$query->id;
 
@@ -152,9 +180,10 @@ class CallbackService
      * @return Message
      * @throws InvalidArgumentException
      */
-    private function updateVacancyText($query, $message, $callbackQueryId, $expand = false)
+    private function toggleVacancyText($query, $message, $callbackQueryId, $expand = false)
     {
         $id = (int)$query->id;
+        $page = (int)$query->page;
 
         // Get the vacancy from cache
         $vacancy = $this->cache->get(
@@ -169,18 +198,14 @@ class CallbackService
         $salary = $vacancy->salary ?: 'Qeyd edilməyib';
 
         // Get the category name from cache
-        $categoryName = $this->cache->get(
-            'app.category.' . str_replace('/', '', $vacancy->category),
-            function (ItemInterface $item) use ($vacancy) {
-                $item->expiresAfter(3600 * 24);
+        $categoryName = $this->botCommand->getCategoryName($vacancy);
 
-                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
-            }
-        );
+        $keyboard = $this->botCommand::generateVacancyInlineKeyboard($vacancy, $page, $expand);
+
+        $text =
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
 
         if ($expand) {
-            $keyboard = self::generateVacancyDetailInlineKeyboard($vacancy);
-
             $vacancy_description =
                 trim(
                     strip_tags(
@@ -198,14 +223,7 @@ class CallbackService
                     $salary,
                     $vacancy_description
                 );
-        } else {
-            $keyboard = $this->botCommand::generateVacancyListInlineKeyboard($vacancy);
-
-            $text =
-                sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
         }
-
-        $this->bot->answerCallbackQuery($callbackQueryId);
 
         return $this->bot->editMessageText(
             $message->chat->id,
@@ -218,28 +236,60 @@ class CallbackService
     }
 
     /**
-     * @param $vacancy
+     * @param     $message
+     * @param     $callbackQueryId
+     * @param int $page
      *
-     * @return InlineKeyboardMarkup
+     * @return bool|Message
+     * @throws ClientExceptionInterface
+     * @throws Exception
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws \TelegramBot\Api\InvalidArgumentException
      */
-    private static function generateVacancyDetailInlineKeyboard($vacancy)
+    private function changeVacancy($message, $callbackQueryId, $page = 1)
     {
-        return new InlineKeyboardMarkup(
-            [
-                [
-                    [
-                        'text' => "Gizlət",
-                        'callback_data' => json_encode(['command' => 'read_less', 'id' => $vacancy->id])
-                    ],
-                    ['text' => "Mənbə", 'url' => $vacancy->url],
-                ],
-                [
-                    [
-                        'text' => "Başqasını göstər",
-                        'callback_data' => json_encode(['command' => 'get_another'])
-                    ],
-                ]
-            ]
+        $telegramChatId = $message->chat->id;
+
+        $chat = $this->em->getRepository(Chat::class)->findOneBy(['chatId' => $telegramChatId]);
+
+        if (!$chat) {
+            return $this->botCommand->setCategory($message);
+        }
+
+        $categoryId = $chat->getVacancyCategoryId();
+
+        // Get vacancies from cache by page
+        $vacancies = $this->botCommand->getVacancies($categoryId, $page);
+
+        if (count($vacancies) == 0) {
+            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_NEXT_VACANCY);
+        }
+
+        // Get a vacancy
+        $vacancy = $vacancies[0];
+
+        // Get the category name from cache
+        $categoryName = $this->botCommand->getCategoryName($vacancy);
+
+        $salary = $vacancy->salary ?: 'Qeyd edilməyib';
+
+        $text =
+            sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
+
+        $keyboard = $this->botCommand::generateVacancyInlineKeyboard($vacancy, $page);
+
+        $this->bot->editMessageText(
+            $telegramChatId,
+            $message->message_id,
+            $text,
+            'HTML',
+            false,
+            $keyboard
         );
+
+        return $this->bot->answerCallbackQuery($callbackQueryId);
     }
 }

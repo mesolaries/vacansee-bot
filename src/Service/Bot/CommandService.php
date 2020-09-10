@@ -90,9 +90,9 @@ class CommandService
 
     /**
      * @param      $message
-     * @param bool $isCallbackQuery
+     * @param int  $page
      *
-     * @return Message
+     * @return bool|Message
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -101,19 +101,11 @@ class CommandService
      * @throws TransportExceptionInterface
      * @throws \Psr\Cache\InvalidArgumentException
      */
-    public function vacancy($message, $isCallbackQuery = false)
+    public function vacancy($message, int $page = 1)
     {
-        $chatId = $message->chat->id;
+        $telegramChatId = $message->chat->id;
 
-        // Get chat from cache
-        $chat = $this->cache->get(
-            'app.chat.' . $chatId,
-            function (ItemInterface $item) use ($chatId) {
-                $item->expiresAfter(3600 * 24);
-
-                return $this->em->getRepository(Chat::class)->findOneBy(['chatId' => $chatId]);
-            }
-        );
+        $chat = $this->em->getRepository(Chat::class)->findOneBy(['chatId' => $telegramChatId]);
 
         if (!$chat) {
             return $this->setCategory($message);
@@ -121,57 +113,27 @@ class CommandService
 
         $categoryId = $chat->getVacancyCategoryId();
 
-        // Get vacancies from cache
-        $vacancies = $this->cache->get(
-            'app.vacancies.' . $categoryId,
-            function (ItemInterface $item) use ($categoryId) {
-                $item->expiresAfter(3600);
-
-                if (!$categoryId) {
-                    return $this->api->getVacancies();
-                }
-
-                return $this->api->getVacanciesByCategoryId($categoryId, ['order[createdAt]' => 'desc']);
-            }
-        );
+        // Get vacancies from cache by page
+        $vacancies = $this->getVacancies($categoryId, $page);
 
         if (count($vacancies) == 0) {
-            return $this->bot->sendMessage($message->chat->id, ReplyMessages::NO_VACANCIES, 'HTML');
+            return $this->bot->sendMessage($telegramChatId, ReplyMessages::NO_VACANCIES, 'HTML');
         }
 
-        // Get a random vacancy
-        $vacancy = $vacancies[mt_rand(0, count($vacancies) - 1)];
+        // Get a vacancy
+        $vacancy = $vacancies[0];
 
         // Get the category name from cache
-        $categoryName = $this->cache->get(
-            'app.category.' . str_replace('/', '', $vacancy->category),
-            function (ItemInterface $item) use ($vacancy) {
-                $item->expiresAfter(3600 * 24);
-
-                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
-            }
-        );
+        $categoryName = $this->getCategoryName($vacancy);
 
         $salary = $vacancy->salary ?: 'Qeyd edilməyib';
 
         $text =
             sprintf(ReplyMessages::VACANCY, $vacancy->title, $categoryName, $vacancy->company, $salary);
 
-        $keyboard = self::generateVacancyListInlineKeyboard($vacancy);
+        $keyboard = self::generateVacancyInlineKeyboard($vacancy, $page);
 
-        // Update the message with new vacancy if it was a callback query
-        if ($isCallbackQuery) {
-            return $this->bot->editMessageText(
-                $message->chat->id,
-                $message->message_id,
-                $text,
-                'HTML',
-                false,
-                $keyboard
-            );
-        }
-
-        return $this->bot->sendMessage($message->chat->id, $text, 'HTML', false, null, $keyboard);
+        return $this->bot->sendMessage($telegramChatId, $text, 'HTML', false, null, $keyboard);
     }
 
     /**
@@ -219,6 +181,65 @@ class CommandService
     }
 
     /**
+     * @param int $categoryId
+     * @param int $page
+     *
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getVacancies(int $categoryId, int $page)
+    {
+        return $this->cache->get(
+            'app.vacancies.' . $categoryId . '.' . $page,
+            function (ItemInterface $item) use ($categoryId, $page) {
+                $item->expiresAfter(3600);
+
+                if (!$categoryId) {
+                    return $this->api->getVacancies(
+                        [
+                            'itemsPerPage' => 1,
+                            'page' => $page,
+                            'createdAt[before]' => date("Y-m-d"),
+                            'createdAt[after]' => date("Y-m-d", strtotime("-1 week"))
+                        ]
+                    );
+                }
+
+                return $this->api->getVacanciesByCategoryId(
+                    $categoryId,
+                    [
+                        'itemsPerPage' => 1,
+                        'page' => $page,
+                        'createdAt[before]' => date("Y-m-d"),
+                        'createdAt[after]' => date(
+                            "Y-m-d",
+                            strtotime("-1 week")
+                        )
+                    ]
+                );
+            }
+        );
+    }
+
+    /**
+     * @param $vacancy
+     *
+     * @return mixed
+     * @throws \Psr\Cache\InvalidArgumentException
+     */
+    public function getCategoryName($vacancy)
+    {
+        return $this->cache->get(
+            'app.category.' . str_replace('/', '', $vacancy->category),
+            function (ItemInterface $item) use ($vacancy) {
+                $item->expiresAfter(3600 * 24);
+
+                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
+            }
+        );
+    }
+
+    /**
      * @return InlineKeyboardMarkup
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
@@ -237,14 +258,14 @@ class CommandService
                 $buttons[$row][] =
                     [
                         'text' => $category->name,
-                        'callback_data' => json_encode(['command' => 'set_category', 'id' => $category->id])
+                        'callback_data' => json_encode(['command' => 'save_user_category', 'id' => $category->id])
                     ];
             }
             $row++;
         }
 
         $buttons[$row][] =
-            ['text' => 'Hamısı', 'callback_data' => json_encode(['command' => 'set_category', 'id' => null])];
+            ['text' => 'Hamısı', 'callback_data' => json_encode(['command' => 'save_user_category', 'id' => null])];
 
         return new InlineKeyboardMarkup(
             $buttons
@@ -252,25 +273,43 @@ class CommandService
     }
 
     /**
-     * @param $vacancy
+     * @param      $vacancy
+     * @param int  $page
+     * @param bool $expanded
      *
      * @return InlineKeyboardMarkup
      */
-    public static function generateVacancyListInlineKeyboard($vacancy)
+    public static function generateVacancyInlineKeyboard($vacancy, int $page, bool $expanded = false)
     {
+        $toggleDetailsButton = [
+            'text' => "Ətraflı",
+            'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id, 'page' => $page])
+        ];
+
+
+        if ($expanded) {
+            $toggleDetailsButton = [
+                'text' => "Bağla",
+                'callback_data' => json_encode(['command' => 'read_less', 'id' => $vacancy->id, 'page' => $page])
+            ];
+        }
+
         return new InlineKeyboardMarkup(
             [
                 [
-                    [
-                        'text' => "Ətraflı",
-                        'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id])
-                    ],
+                    $toggleDetailsButton,
+                ],
+                [
                     ['text' => "Mənbə", 'url' => $vacancy->url],
                 ],
                 [
                     [
-                        'text' => "Başqasını göstər",
-                        'callback_data' => json_encode(['command' => 'get_another'])
+                        'text' => "⬅️ Əvvəlki",
+                        'callback_data' => json_encode(['command' => 'prev', 'page' => ($page - 1)])
+                    ],
+                    [
+                        'text' => "Növbəti ➡️",
+                        'callback_data' => json_encode(['command' => 'next', 'page' => ($page + 1)])
                     ],
                 ]
             ]
