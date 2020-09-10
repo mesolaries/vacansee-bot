@@ -14,6 +14,7 @@ use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use TelegramBot\Api\Exception;
+use TelegramBot\Api\HttpException;
 use TelegramBot\Api\Types\Message;
 
 class CallbackService
@@ -72,7 +73,7 @@ class CallbackService
      */
     public function readMore($query, $message, $callbackQueryId)
     {
-        $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->answerCallbackQuery($callbackQueryId);
         return $this->toggleVacancyText($query, $message, $callbackQueryId, true);
     }
 
@@ -86,7 +87,7 @@ class CallbackService
      */
     public function readLess($query, $message, $callbackQueryId)
     {
-        $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->answerCallbackQuery($callbackQueryId);
         return $this->toggleVacancyText($query, $message, $callbackQueryId, false);
     }
 
@@ -130,7 +131,7 @@ class CallbackService
         $page = (int)$query->page;
 
         if ($page < 1) {
-            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
+            return $this->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
         }
 
         return $this->changeVacancy($message, $callbackQueryId, $page);
@@ -164,7 +165,7 @@ class CallbackService
 
         $this->cache->delete('app.chat.' . $message->chat->id);
 
-        $this->bot->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
+        $this->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
 
         return $this->bot->editMessageText(
             $message->chat->id,
@@ -268,7 +269,7 @@ class CallbackService
         $vacancies = $this->botCommand->getVacancies($categoryId, $page);
 
         if (count($vacancies) == 0) {
-            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
+            return $this->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
         }
 
         // Get a vacancy
@@ -284,7 +285,7 @@ class CallbackService
 
         $keyboard = $this->botCommand::generateVacancyInlineKeyboard($vacancy, $page);
 
-        $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->answerCallbackQuery($callbackQueryId);
 
         return $this->bot->editMessageText(
             $telegramChatId,
@@ -294,5 +295,16 @@ class CallbackService
             false,
             $keyboard
         );
+    }
+
+    private function answerCallbackQuery($callbackQueryId, $text = null, $showAlert = false)
+    {
+        try {
+            $this->bot->answerCallbackQuery($callbackQueryId, $text, $showAlert);
+        } catch (HttpException $e) {
+            // Prevent Exception if the script took a long time
+        }
+
+        return true;
     }
 }
