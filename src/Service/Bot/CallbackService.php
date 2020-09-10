@@ -212,7 +212,7 @@ class CallbackService
             $vacancy_description =
                 trim(
                     strip_tags(
-                        preg_replace("/<br ?\\/?>|<\\/?p ?>|<\\/?h[1-6] ?>/", "\n", $vacancy->descriptionHtml),
+                        preg_replace("/<br ?\\/?>|<\\/?p ?>|<\\/?li ?>|<\\/?h[1-6] ?>/", "\n", $vacancy->descriptionHtml),
                         ['b', 'strong', 'i', 'em', 'u', 'ins', 's', 'strike', 'del', 'a', 'code', 'pre']
                     )
                 );
