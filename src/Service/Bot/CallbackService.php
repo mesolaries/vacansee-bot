@@ -141,10 +141,8 @@ class CallbackService
      * @param $message
      * @param $callbackQueryId
      *
-     * @return Message
-     * @throws Exception
+     * @return bool
      * @throws InvalidArgumentException
-     * @throws \TelegramBot\Api\InvalidArgumentException
      */
     public function saveUserCategory($query, $message, $callbackQueryId)
     {
@@ -166,9 +164,14 @@ class CallbackService
 
         $this->cache->delete('app.chat.' . $message->chat->id);
 
-        $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->bot->editMessageText(
+            $message->chat->id,
+            $message->message_id,
+            ReplyMessages::CATEGORY_WAS_SET,
+            'HTML'
+        );
 
-        return $this->bot->sendMessage($message->chat->id, ReplyMessages::CATEGORY_WAS_SET);
+        return $this->bot->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
     }
 
     /**
