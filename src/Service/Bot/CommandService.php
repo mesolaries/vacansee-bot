@@ -135,6 +135,10 @@ class CommandService
             }
         );
 
+        if (count($vacancies) == 0) {
+            return $this->bot->sendMessage($message->chat->id, ReplyMessages::NO_VACANCIES, 'HTML');
+        }
+
         // Get a random vacancy
         $vacancy = $vacancies[mt_rand(0, count($vacancies) - 1)];
 

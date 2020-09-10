@@ -93,7 +93,7 @@ class CallbackService
      * @param $message
      * @param $callbackQueryId
      *
-     * @return Message
+     * @return bool
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -104,8 +104,8 @@ class CallbackService
      */
     public function getAnother($query, $message, $callbackQueryId)
     {
-        $this->bot->answerCallbackQuery($callbackQueryId);
-        return $this->botCommand->vacancy($message, true);
+        $this->botCommand->vacancy($message, true);
+        return $this->bot->answerCallbackQuery($callbackQueryId);
     }
 
     /**

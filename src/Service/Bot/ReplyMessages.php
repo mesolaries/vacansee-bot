@@ -17,6 +17,8 @@ class ReplyMessages
 
     public const CATEGORY_WAS_SET = "Oldu. Vakansiya göndərməyimi istəyəndə mənə /vacancy yaz.";
 
+    public const NO_VACANCIES = "Hal-hazırda vakansiya yoxdur. Bir qədər sonra yenidən yoxla.";
+
     public const DONATE = "%s, mənə dəstək olmaq üçün aşağıdakı linkə keçid et və istədiyin məbləği göndər.\n\n" .
     "https://yasobe.ru/na/donate_vacansee\n\n" .
     "Dəstəyin üçün təşəkkür edirəm!";
