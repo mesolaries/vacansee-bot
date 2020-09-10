@@ -15,6 +15,8 @@ class ReplyMessages
 
     public const DONT_UNDERSTAND = "Bağışla... Amma mən səni başa düşmədim.";
 
+    public const NOT_EXISTING_CALLBACK = "Belə düymə yoxdur və ya köhnəlib. Yenidən /vacancy göndərməyi yoxla.";
+
     public const CATEGORY_WAS_SET = "Oldu. Vakansiya göndərməyimi istəyəndə mənə /vacancy yaz.";
 
     public const NO_VACANCIES = "Hal-hazırda vakansiya yoxdur. Bir qədər sonra yenidən yoxla.";

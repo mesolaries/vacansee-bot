@@ -71,9 +71,12 @@ class WebhookController extends AbstractController
             $callbackQueryId = $content->callback_query->id;
             $text = $query->command;
 
-            if (in_array($text, $this->callback::CALLBACKS)) {
-                $this->callback->$text($query, $message, $callbackQueryId);
+            if (!in_array($text, $this->callback::CALLBACKS)) {
+                $this->bot->sendMessage($message->chat->id, ReplyMessages::NOT_EXISTING_CALLBACK);
+                return new Response();
             }
+
+            $this->callback->$text($query, $message, $callbackQueryId);
         }
 
         return new Response();
