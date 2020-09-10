@@ -21,9 +21,7 @@ class ReplyMessages
 
     public const NO_VACANCIES = "Hal-hazırda vakansiya yoxdur. Bir qədər sonra yenidən yoxla.";
 
-    public const NO_NEXT_VACANCY = "Növbəti vakansiya yoxdur.";
-
-    public const NO_PREV_VACANCY = "Əvvəlki vakansiya yoxdur.";
+    public const NO_VACANCY_PAGINATION = "Vakansiya yoxdur.";
 
     public const DONATE = "%s, mənə dəstək olmaq üçün aşağıdakı linkə keçid et və istədiyin məbləği göndər.\n\n" .
     "https://yasobe.ru/na/donate_vacansee\n\n" .

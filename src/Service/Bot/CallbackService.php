@@ -67,13 +67,13 @@ class CallbackService
      * @param       $message
      * @param       $callbackQueryId
      *
-     * @return bool
+     * @return Message
      * @throws InvalidArgumentException
      */
     public function readMore($query, $message, $callbackQueryId)
     {
-        $this->toggleVacancyText($query, $message, $callbackQueryId, true);
-        return $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->bot->answerCallbackQuery($callbackQueryId);
+        return $this->toggleVacancyText($query, $message, $callbackQueryId, true);
     }
 
     /**
@@ -81,13 +81,13 @@ class CallbackService
      * @param     $message
      * @param     $callbackQueryId
      *
-     * @return bool
+     * @return Message
      * @throws InvalidArgumentException
      */
     public function readLess($query, $message, $callbackQueryId)
     {
-        $this->toggleVacancyText($query, $message, $callbackQueryId, false);
-        return $this->bot->answerCallbackQuery($callbackQueryId);
+        $this->bot->answerCallbackQuery($callbackQueryId);
+        return $this->toggleVacancyText($query, $message, $callbackQueryId, false);
     }
 
     /**
@@ -130,7 +130,7 @@ class CallbackService
         $page = (int)$query->page;
 
         if ($page < 1) {
-            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_PREV_VACANCY);
+            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
         }
 
         return $this->changeVacancy($message, $callbackQueryId, $page);
@@ -141,7 +141,7 @@ class CallbackService
      * @param $message
      * @param $callbackQueryId
      *
-     * @return bool
+     * @return Message
      * @throws InvalidArgumentException
      */
     public function saveUserCategory($query, $message, $callbackQueryId)
@@ -164,14 +164,14 @@ class CallbackService
 
         $this->cache->delete('app.chat.' . $message->chat->id);
 
-        $this->bot->editMessageText(
+        $this->bot->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
+
+        return $this->bot->editMessageText(
             $message->chat->id,
             $message->message_id,
             ReplyMessages::CATEGORY_WAS_SET,
             'HTML'
         );
-
-        return $this->bot->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
     }
 
     /**
@@ -268,7 +268,7 @@ class CallbackService
         $vacancies = $this->botCommand->getVacancies($categoryId, $page);
 
         if (count($vacancies) == 0) {
-            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_NEXT_VACANCY);
+            return $this->bot->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
         }
 
         // Get a vacancy
@@ -284,7 +284,9 @@ class CallbackService
 
         $keyboard = $this->botCommand::generateVacancyInlineKeyboard($vacancy, $page);
 
-        $this->bot->editMessageText(
+        $this->bot->answerCallbackQuery($callbackQueryId);
+
+        return $this->bot->editMessageText(
             $telegramChatId,
             $message->message_id,
             $text,
@@ -292,7 +294,5 @@ class CallbackService
             false,
             $keyboard
         );
-
-        return $this->bot->answerCallbackQuery($callbackQueryId);
     }
 }
