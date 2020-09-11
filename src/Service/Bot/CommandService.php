@@ -200,7 +200,8 @@ class CommandService
                             'itemsPerPage' => 1,
                             'page' => $page,
                             'createdAt[before]' => date("Y-m-d"),
-                            'createdAt[after]' => date("Y-m-d", strtotime("-1 week"))
+                            'createdAt[after]' => date("Y-m-d", strtotime("-1 week")),
+                            'order[id]' => 'desc',
                         ]
                     );
                 }
@@ -214,7 +215,8 @@ class CommandService
                         'createdAt[after]' => date(
                             "Y-m-d",
                             strtotime("-1 week")
-                        )
+                        ),
+                        'order[id]' => 'desc',
                     ]
                 );
             }
