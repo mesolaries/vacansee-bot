@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\Channel;
 use App\Entity\Vacancy;
-use App\Repository\VacancyRepository;
 use App\Service\Api\Vacansee;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
@@ -36,9 +35,8 @@ class ChannelVacancyGetCommand extends Command
                 'channel',
                 'ch',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                "Specify channel(s) the vacancies to get for. Default: All channels\nChoose from: [" .
-                implode(', ', array_keys(Channel::CHANNELS)) .
-                "]",
+                "Specify channel(s) the vacancies to get for. \nMapping: " .
+                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT) . "\n",
                 array_keys(Channel::CHANNELS)
             );
     }
@@ -92,7 +90,6 @@ class ChannelVacancyGetCommand extends Command
             }
 
 
-            /** @var VacancyRepository $vacancyRepository */
             $vacancyRepository = $this->em->getRepository(Vacancy::class);
 
             $newVacanciesCount = count($newVacancies);

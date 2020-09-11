@@ -4,7 +4,6 @@ namespace App\Command;
 
 use App\Entity\Channel;
 use App\Entity\Vacancy;
-use App\Repository\VacancyRepository;
 use App\Service\Api\Vacansee;
 use App\Service\Bot\Bot;
 use App\Service\Bot\ReplyMessages;
@@ -42,9 +41,8 @@ class ChannelVacancySendCommand extends Command
                 'channel',
                 'ch',
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
-                "Specify channel(s) to send a vacancy.\nChoose from: [" .
-                implode(', ', array_keys(Channel::CHANNELS)) .
-                "]",
+                "Specify channel(s) to send a vacancy. \nMapping: " .
+                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT) . "\n",
                 array_keys(Channel::CHANNELS)
             );
     }
@@ -57,7 +55,6 @@ class ChannelVacancySendCommand extends Command
 
         $channelRepository = $this->em->getRepository(Channel::class);
 
-        /** @var VacancyRepository $vacancyRepository */
         $vacancyRepository = $this->em->getRepository(Vacancy::class);
 
         foreach ($channelIds as $channelId) {
