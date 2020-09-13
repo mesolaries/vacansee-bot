@@ -67,24 +67,21 @@ class ChannelVacancyGetCommand extends Command
             }
 
 
-            $startDate = new \DateTime('today');
-            $endDate = new \DateTime();
+            $now = new \DateTime();
 
             if ($channel->getCategorySlug()) {
                 $newVacancies =
                     $this->api->getVacanciesByCategorySlug(
                         $channel->getCategorySlug(),
                         [
-                            'createdAt[before]' => $endDate->format('Y-m-d'),
-                            'createdAt[after]' => $startDate->format('Y-m-d')
+                            'createdAt[after]' => $now->format('Y-m-d'),
                         ]
                     );
             } else {
                 $newVacancies =
                     $this->api->getVacancies(
                         [
-                            'createdAt[before]' => $endDate->format('Y-m-d'),
-                            'createdAt[after]' => $startDate->format('Y-m-d')
+                            'createdAt[after]' => $now->format('Y-m-d'),
                         ]
                     );
             }
