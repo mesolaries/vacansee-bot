@@ -105,7 +105,7 @@ class ChannelVacancySendCommand extends Command
                     $salary
                 );
 
-            if (Channel::CHANNELS[$channelId] == 'it') {
+            if (Channel::CHANNELS[$channelId] == 'it' && $this->container->hasParameter('yourls_signature')) {
                 $text .= "\n\n" . $this->shortenUrl($vacancyResource->url);
 
                 $this->bot->sendMessage($channelId, $text, 'HTML', true, null);
