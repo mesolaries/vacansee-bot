@@ -1,6 +1,6 @@
 # Vacansee Bot
 
-Vacansee Bot is a Telegram bot which sends vacancies to users via [Vacansee API](https://github.com/mesolaries/vacansee-api).
+Vacansee Bot is a [Telegram](https://telegram.org/) bot which sends vacancies to users via [Vacansee API](https://github.com/mesolaries/vacansee-api).
 
 ## Deploying
 
@@ -12,7 +12,7 @@ $ composer install
 
 Create `.env.local` file or modify `.env` file. Set `DATABASE_URL`, `TELEGRAM_BOT_TOKEN` and `VACANSEE_API_KEY` environment variables.
 
-Create database and run migrations:
+Create a database and run migrations:
 
 ```bash
 $ php bin/console doctrine:database:create
@@ -36,3 +36,9 @@ Please make sure to update tests as appropriate.
 
 ## License
 [MIT](LICENSE)
+
+## External links
+- https://vacansee.xyz - An API for vacancies available in Azerbaijan
+- https://t.me/vacansee_bot - Vacansee bot
+- https://t.me/vacansee_it - Telegram channel with IT vacancies only
+- https://t.me/vacansee_all - Telegram channel with all vacancies
