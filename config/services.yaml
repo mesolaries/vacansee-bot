@@ -6,6 +6,7 @@
 parameters:
     telegram_bot_token: '%env(TELEGRAM_BOT_TOKEN)%'
     vacansee_api_key: '%env(VACANSEE_API_KEY)%'
+    yourls_signature: '%env(YOURLS_SIGNATURE)%'
 
 
 services:

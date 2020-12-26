@@ -13,6 +13,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\DependencyInjection\ContainerInterface;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 
 class ChannelVacancySendCommand extends Command
@@ -25,11 +26,19 @@ class ChannelVacancySendCommand extends Command
 
     private Vacansee $api;
 
-    public function __construct(EntityManagerInterface $em, Bot $bot, Vacansee $api, string $name = null)
-    {
-        $this->em = $em;
-        $this->bot = $bot;
-        $this->api = $api;
+    private ContainerInterface $container;
+
+    public function __construct(
+        EntityManagerInterface $em,
+        Bot $bot,
+        Vacansee $api,
+        ContainerInterface $container,
+        string $name = null
+    ) {
+        $this->em        = $em;
+        $this->bot       = $bot;
+        $this->api       = $api;
+        $this->container = $container;
         parent::__construct($name);
     }
 
@@ -44,7 +53,8 @@ class ChannelVacancySendCommand extends Command
                 "Specify channel(s) to send a vacancy. \nMapping: " .
                 json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT) . "\n",
                 array_keys(Channel::CHANNELS)
-            );
+            )
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -95,15 +105,21 @@ class ChannelVacancySendCommand extends Command
                     $salary
                 );
 
-            $keyboard = new InlineKeyboardMarkup(
-                [
-                    [
-                        ['text' => "Mənbə", 'url' => $vacancyResource->url],
-                    ]
-                ]
-            );
+            if (Channel::CHANNELS[$channelId] == 'it') {
+                $text .= "\n\n" . $this->shortenUrl($vacancyResource->url);
 
-            $this->bot->sendMessage($channelId, $text, 'HTML', true, null, $keyboard);
+                $this->bot->sendMessage($channelId, $text, 'HTML', true, null);
+            } else {
+                $keyboard = new InlineKeyboardMarkup(
+                    [
+                        [
+                            ['text' => "Mənbə", 'url' => $vacancyResource->url],
+                        ]
+                    ]
+                );
+
+                $this->bot->sendMessage($channelId, $text, 'HTML', true, null, $keyboard);
+            }
 
             $vacancy->setIsSent(true);
 
@@ -117,5 +133,44 @@ class ChannelVacancySendCommand extends Command
         $io->success('All vacancy messages sent successfully!');
 
         return 0;
+    }
+
+    /**
+     * Shorten URL using YOURLS
+     *
+     * @param string $url
+     *
+     * @return string
+     */
+    private function shortenUrl(string $url): string
+    {
+        $signature = $this->container->getParameter('yourls_signature');
+        $api_url   = 'https://a.vacansee.xyz/yourls-api.php';
+
+        // Init the CURL session
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $api_url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);            // No header in the result
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); // Return, do not echo result
+        curl_setopt($ch, CURLOPT_POST, 1);              // This is a POST request
+        curl_setopt(
+            $ch,
+            CURLOPT_POSTFIELDS,
+            [     // Data to POST
+                'url'       => $url,
+                'format'    => 'json',
+                'action'    => 'shorturl',
+                'signature' => $signature,
+            ]
+        );
+
+        // Fetch and return content
+        $data = curl_exec($ch);
+        curl_close($ch);
+
+        // Do something with the result. Here, we echo the long URL
+        $data = json_decode($data);
+
+        return $data->shorturl;
     }
 }
