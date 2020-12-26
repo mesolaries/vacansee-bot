@@ -24,7 +24,7 @@ class ReplyMessages
     public const NO_VACANCY_PAGINATION = "Vakansiya yoxdur.";
 
     public const DONATE = "%s, mənə dəstək olmaq üçün aşağıdakı linkə keçid et və istədiyin məbləği göndər.\n\n" .
-    "https://yasobe.ru/na/donate_vacansee\n\n" .
+    "https://sobe.ru/na/donate_vacansee\n\n" .
     "Dəstəyin üçün təşəkkür edirəm!";
 
     public const CREDITS = "Emil Manafov - @mnf_emil tərəfindən yaradılıb.\n\n" .
