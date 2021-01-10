@@ -42,4 +42,8 @@ class ReplyMessages
     "/credits - Mənim yaradıcılarım haqqında məlumat verəcəm\n\n" .
     "/donate - Xərclərimi ödəmək üçün proqramçının dəstəyə ehtiyacı var.\n\n" .
     "Bir təşəkkür <i>kofesi ☕️</i> bəsdir &#x1F60A";
+
+    // START FACEBOOK TESTING
+    public const FACEBOOK_VACANCY = "%s\n\nKateqoriya: #%s\nŞirkət: %s\nƏmək haqqı: %s\n\n%s";
+    // END FACEBOOK TESTING
 }

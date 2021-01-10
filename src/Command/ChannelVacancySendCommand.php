@@ -114,11 +114,53 @@ class ChannelVacancySendCommand extends Command
                     [
                         [
                             ['text' => "Mənbə", 'url' => $vacancyResource->url],
-                        ]
+                        ],
                     ]
                 );
 
                 $this->bot->sendMessage($channelId, $text, 'HTML', true, null, $keyboard);
+
+                // START FACEBOOK TESTING
+                // TODO: Separate Facebook code from Telegram
+
+                $fbUrl     = "https://graph.facebook.com/v9.0/%s/feed?message=%s&link=%s&access_token=%s";
+                $fbMessage =
+                    sprintf(
+                        ReplyMessages::FACEBOOK_VACANCY,
+                        $vacancyResource->title,
+                        $categoryName,
+                        $vacancyResource->company,
+                        $salary,
+                        $vacancyResource->url
+                    );
+                $fbPageId  = $this->container->getParameter('facebook_page_id');
+                $fbToken   = $this->container->getParameter('facebook_long_lived_page_token');
+                $fbUrl     = sprintf($fbUrl, $fbPageId, urlencode($fbMessage), $vacancyResource->url, $fbToken);
+
+                $curl = curl_init();
+
+                curl_setopt_array(
+                    $curl,
+                    [
+                        CURLOPT_URL            => $fbUrl,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_ENCODING       => '',
+                        CURLOPT_MAXREDIRS      => 10,
+                        CURLOPT_TIMEOUT        => 0,
+                        CURLOPT_FOLLOWLOCATION => true,
+                        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST  => 'POST',
+                    ]
+                );
+
+                $response = curl_exec($curl);
+
+                curl_close($curl);
+
+                $io->text('FACEBOOK API URL: ' . $fbUrl);
+                $io->note('FACEBOOK API RESPONSE: ' . $response);
+
+                // END FACEBOOK TESTING
             }
 
             $vacancy->setIsSent(true);

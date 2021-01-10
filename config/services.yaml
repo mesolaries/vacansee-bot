@@ -7,6 +7,8 @@ parameters:
     telegram_bot_token: '%env(TELEGRAM_BOT_TOKEN)%'
     vacansee_api_key: '%env(VACANSEE_API_KEY)%'
     yourls_signature: '%env(YOURLS_SIGNATURE)%'
+    facebook_long_lived_page_token: '%env(FACEBOOK_LONG_LIVED_PAGE_TOKEN)%'
+    facebook_page_id: '%env(FACEBOOK_PAGE_ID)%'
 
 
 services:
