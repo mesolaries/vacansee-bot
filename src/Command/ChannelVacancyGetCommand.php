@@ -35,8 +35,8 @@ class ChannelVacancyGetCommand extends Command
                 'channel',
                 'ch',
                 InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
-                "Specify channel(s) the vacancies to get for. \nMapping: " .
-                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT) . "\n",
+                "Specify channel(s) the vacancies to get for. \nMapping: ".
+                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT)."\n",
                 array_keys(Channel::CHANNELS)
             );
     }
@@ -55,17 +55,15 @@ class ChannelVacancyGetCommand extends Command
             /** @var Channel|null $channel */
             $channel = $channelRepository->findOneBy(['channelId' => $channelId]);
 
-
             if (!$channel) {
                 $io->warning(
-                    "The channel id $channelId not found." .
-                    "You either forgot to run app:channel:sync command or you've entered the wrong channel id option.\n" .
-                    "Continuing with the next channel..."
+                    "The channel id $channelId not found.".
+                    "You either forgot to run app:channel:sync command or you've entered the wrong channel id option.\n".
+                    'Continuing with the next channel...'
                 );
 
                 continue;
             }
-
 
             $now = new \DateTime();
 
@@ -86,14 +84,13 @@ class ChannelVacancyGetCommand extends Command
                     );
             }
 
-
             $vacancyRepository = $this->em->getRepository(Vacancy::class);
 
             $newVacanciesCount = count($newVacancies);
 
             foreach ($newVacancies as $newVacancy) {
                 if ($vacancyRepository->findOneBy(['vacancyId' => $newVacancy->id, 'channel' => $channel])) {
-                    $newVacanciesCount--;
+                    --$newVacanciesCount;
                     continue;
                 }
 

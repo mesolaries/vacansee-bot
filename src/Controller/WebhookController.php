@@ -23,10 +23,6 @@ class WebhookController extends AbstractController
 
     /**
      * WebhookController constructor.
-     *
-     * @param Bot             $bot
-     * @param CommandService  $command
-     * @param CallbackService $callback
      */
     public function __construct(Bot $bot, CommandService $command, CallbackService $callback)
     {
@@ -38,10 +34,8 @@ class WebhookController extends AbstractController
     /**
      * @Route("/bot/{token}", name="app.bot.webhook", methods={"POST"}, requirements={"token"="\d+:.+"})
      *
-     * @param Request $request
-     * @param string  $token
-     *
      * @return Response
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      */
@@ -61,6 +55,7 @@ class WebhookController extends AbstractController
 
             if (!in_array($text, $this->command::COMMANDS)) {
                 $this->bot->sendMessage($message->chat->id, ReplyMessages::DONT_UNDERSTAND);
+
                 return new Response();
             }
 
@@ -73,6 +68,7 @@ class WebhookController extends AbstractController
 
             if (!in_array($text, $this->callback::CALLBACKS)) {
                 $this->bot->sendMessage($message->chat->id, ReplyMessages::NOT_EXISTING_CALLBACK);
+
                 return new Response();
             }
 

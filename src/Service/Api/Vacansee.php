@@ -2,7 +2,6 @@
 
 namespace App\Service\Api;
 
-
 use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
@@ -28,9 +27,8 @@ class Vacansee
     }
 
     /**
-     * @param int $id
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -40,7 +38,7 @@ class Vacansee
     {
         $response = $this->http->request(
             'GET',
-            self::URLS['vacancy'] . "/$id",
+            self::URLS['vacancy']."/$id",
             ['headers' => ['Accept' => 'application/json'], 'query' => ['apikey' => $this->key]]
         );
 
@@ -48,9 +46,8 @@ class Vacansee
     }
 
     /**
-     * @param array $query
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -64,7 +61,7 @@ class Vacansee
             self::URLS['vacancy'],
             [
                 'headers' => ['Accept' => 'application/json'],
-                'query' => $query
+                'query' => $query,
             ]
         );
 
@@ -72,10 +69,8 @@ class Vacansee
     }
 
     /**
-     * @param int   $categoryId
-     * @param array $query
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -99,10 +94,8 @@ class Vacansee
     }
 
     /**
-     * @param string $categorySlug
-     * @param array  $query
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -126,9 +119,8 @@ class Vacansee
     }
 
     /**
-     * @param array $query
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -154,6 +146,7 @@ class Vacansee
      * @param $id
      *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -163,7 +156,7 @@ class Vacansee
     {
         $response = $this->http->request(
             'GET',
-            self::URLS['category'] . "/$id",
+            self::URLS['category']."/$id",
             [
                 'headers' => ['Accept' => 'application/json'],
                 'query' => ['apikey' => $this->key],
@@ -174,10 +167,8 @@ class Vacansee
     }
 
     /**
-     * @param string $uri
-     * @param array  $query
-     *
      * @return mixed
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -189,7 +180,7 @@ class Vacansee
 
         $response = $this->http->request(
             'GET',
-            self::URLS['base'] . $uri,
+            self::URLS['base'].$uri,
             [
                 'headers' => ['Accept' => 'application/json'],
                 'query' => $query,

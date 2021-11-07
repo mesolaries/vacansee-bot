@@ -2,7 +2,6 @@
 
 namespace App\Service\Bot;
 
-
 use App\Entity\Chat;
 use App\Service\Api\Vacansee;
 use Doctrine\ORM\EntityManagerInterface;
@@ -62,32 +61,35 @@ class CallbackService
         call_user_func_array([$this, $name], $arguments);
     }
 
-
     /**
-     * @param       $query
-     * @param       $message
-     * @param       $callbackQueryId
+     * @param $query
+     * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
+     *
      * @throws InvalidArgumentException
      */
     public function readMore($query, $message, $callbackQueryId)
     {
         $this->answerCallbackQuery($callbackQueryId);
+
         return $this->toggleVacancyText($query, $message, $callbackQueryId, true);
     }
 
     /**
-     * @param     $query
-     * @param     $message
-     * @param     $callbackQueryId
+     * @param $query
+     * @param $message
+     * @param $callbackQueryId
      *
      * @return Message
+     *
      * @throws InvalidArgumentException
      */
     public function readLess($query, $message, $callbackQueryId)
     {
         $this->answerCallbackQuery($callbackQueryId);
+
         return $this->toggleVacancyText($query, $message, $callbackQueryId, false);
     }
 
@@ -97,6 +99,7 @@ class CallbackService
      * @param $callbackQueryId
      *
      * @return bool|Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -107,7 +110,7 @@ class CallbackService
      */
     public function next($query, $message, $callbackQueryId)
     {
-        $page = (int)$query->page;
+        $page = (int) $query->page;
 
         return $this->changeVacancy($message, $callbackQueryId, $page);
     }
@@ -118,6 +121,7 @@ class CallbackService
      * @param $callbackQueryId
      *
      * @return bool|Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -128,7 +132,7 @@ class CallbackService
      */
     public function prev($query, $message, $callbackQueryId)
     {
-        $page = (int)$query->page;
+        $page = (int) $query->page;
 
         if ($page < 1) {
             return $this->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
@@ -143,11 +147,12 @@ class CallbackService
      * @param $callbackQueryId
      *
      * @return Message
+     *
      * @throws InvalidArgumentException
      */
     public function saveUserCategory($query, $message, $callbackQueryId)
     {
-        $categoryId = (int)$query->id;
+        $categoryId = (int) $query->id;
 
         $repository = $this->em->getRepository(Chat::class);
 
@@ -163,7 +168,7 @@ class CallbackService
         $this->em->persist($chat);
         $this->em->flush();
 
-        $this->cache->delete('app.chat.' . $message->chat->id);
+        $this->cache->delete('app.chat.'.$message->chat->id);
 
         $this->answerCallbackQuery($callbackQueryId, 'Kateqoriya seçildi.');
 
@@ -182,16 +187,17 @@ class CallbackService
      * @param bool $expand
      *
      * @return Message
+     *
      * @throws InvalidArgumentException
      */
     private function toggleVacancyText($query, $message, $callbackQueryId, $expand = false)
     {
-        $id = (int)$query->id;
-        $page = (int)$query->page;
+        $id = (int) $query->id;
+        $page = (int) $query->page;
 
         // Get the vacancy from cache
         $vacancy = $this->cache->get(
-            'app.vacancy.' . $id,
+            'app.vacancy.'.$id,
             function (ItemInterface $item) use ($id) {
                 $item->expiresAfter(3600 * 24);
 
@@ -213,14 +219,14 @@ class CallbackService
             $vacancy_description =
                 trim(
                     strip_tags(
-                        preg_replace("/<br ?\\/?>|<\\/?p ?>|<\\/?li ?>|<\\/?ul ?>|<\\/?h[1-6] ?>/", "\n", $vacancy->descriptionHtml),
+                        preg_replace('/<br ?\\/?>|<\\/?p ?>|<\\/?li ?>|<\\/?ul ?>|<\\/?h[1-6] ?>/', "\n", $vacancy->descriptionHtml),
                         ['b', 'strong', 'i', 'em', 'u', 'ins', 's', 'strike', 'del', 'a', 'code', 'pre']
                     )
                 );
 
             $text =
                 sprintf(
-                    ReplyMessages::VACANCY . ReplyMessages::VACANCY_DESCRIPTION,
+                    ReplyMessages::VACANCY.ReplyMessages::VACANCY_DESCRIPTION,
                     $vacancy->title,
                     $categoryName,
                     $vacancy->company,
@@ -245,6 +251,7 @@ class CallbackService
      * @param int $page
      *
      * @return bool|Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -268,7 +275,7 @@ class CallbackService
         // Get vacancies from cache by page
         $vacancies = $this->botCommand->getVacancies($categoryId, $page);
 
-        if (count($vacancies) == 0) {
+        if (0 == count($vacancies)) {
             return $this->answerCallbackQuery($callbackQueryId, ReplyMessages::NO_VACANCY_PAGINATION);
         }
 

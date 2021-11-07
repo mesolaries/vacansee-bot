@@ -35,9 +35,9 @@ class ChannelVacancySendCommand extends Command
         ContainerInterface $container,
         string $name = null
     ) {
-        $this->em        = $em;
-        $this->bot       = $bot;
-        $this->api       = $api;
+        $this->em = $em;
+        $this->bot = $bot;
+        $this->api = $api;
         $this->container = $container;
         parent::__construct($name);
     }
@@ -50,8 +50,8 @@ class ChannelVacancySendCommand extends Command
                 'channel',
                 'ch',
                 InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED,
-                "Specify channel(s) to send a vacancy. \nMapping: " .
-                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT) . "\n",
+                "Specify channel(s) to send a vacancy. \nMapping: ".
+                json_encode(Channel::CHANNELS, JSON_PRETTY_PRINT)."\n",
                 array_keys(Channel::CHANNELS)
             )
         ;
@@ -71,12 +71,11 @@ class ChannelVacancySendCommand extends Command
             /** @var Channel|null $channel */
             $channel = $channelRepository->findOneBy(['channelId' => $channelId]);
 
-
             if (!$channel) {
                 $io->warning(
-                    "The channel id $channelId not found." .
-                    "You either forgot to run app:channel:sync command or you've entered the wrong channel id option.\n" .
-                    "Continuing with the next channel..."
+                    "The channel id $channelId not found.".
+                    "You either forgot to run app:channel:sync command or you've entered the wrong channel id option.\n".
+                    'Continuing with the next channel...'
                 );
 
                 continue;
@@ -105,15 +104,15 @@ class ChannelVacancySendCommand extends Command
                     $salary
                 );
 
-            if (Channel::CHANNELS[$channelId] == 'it' && $this->container->hasParameter('yourls_signature')) {
-                $text .= "\n\n" . $this->shortenUrl($vacancyResource->url);
+            if ('it' == Channel::CHANNELS[$channelId] && $this->container->hasParameter('yourls_signature')) {
+                $text .= "\n\n".$this->shortenUrl($vacancyResource->url);
 
                 $this->bot->sendMessage($channelId, $text, 'HTML', true, null);
             } else {
                 $keyboard = new InlineKeyboardMarkup(
                     [
                         [
-                            ['text' => "Mənbə", 'url' => $vacancyResource->url],
+                            ['text' => 'Mənbə', 'url' => $vacancyResource->url],
                         ],
                     ]
                 );
@@ -123,7 +122,7 @@ class ChannelVacancySendCommand extends Command
                 // START FACEBOOK TESTING
                 // TODO: Separate Facebook code from Telegram
 
-                $fbUrl     = "https://graph.facebook.com/v9.0/%s/feed?message=%s&link=%s&access_token=%s";
+                $fbUrl = 'https://graph.facebook.com/v9.0/%s/feed?message=%s&link=%s&access_token=%s';
                 $fbMessage =
                     sprintf(
                         ReplyMessages::FACEBOOK_VACANCY,
@@ -133,23 +132,23 @@ class ChannelVacancySendCommand extends Command
                         $salary,
                         $vacancyResource->url
                     );
-                $fbPageId  = $this->container->getParameter('facebook_page_id');
-                $fbToken   = $this->container->getParameter('facebook_long_lived_page_token');
-                $fbUrl     = sprintf($fbUrl, $fbPageId, urlencode($fbMessage), $vacancyResource->url, $fbToken);
+                $fbPageId = $this->container->getParameter('facebook_page_id');
+                $fbToken = $this->container->getParameter('facebook_long_lived_page_token');
+                $fbUrl = sprintf($fbUrl, $fbPageId, urlencode($fbMessage), $vacancyResource->url, $fbToken);
 
                 $curl = curl_init();
 
                 curl_setopt_array(
                     $curl,
                     [
-                        CURLOPT_URL            => $fbUrl,
+                        CURLOPT_URL => $fbUrl,
                         CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_ENCODING       => '',
-                        CURLOPT_MAXREDIRS      => 10,
-                        CURLOPT_TIMEOUT        => 0,
+                        CURLOPT_ENCODING => '',
+                        CURLOPT_MAXREDIRS => 10,
+                        CURLOPT_TIMEOUT => 0,
                         CURLOPT_FOLLOWLOCATION => true,
-                        CURLOPT_HTTP_VERSION   => CURL_HTTP_VERSION_1_1,
-                        CURLOPT_CUSTOMREQUEST  => 'POST',
+                        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+                        CURLOPT_CUSTOMREQUEST => 'POST',
                     ]
                 );
 
@@ -157,8 +156,8 @@ class ChannelVacancySendCommand extends Command
 
                 curl_close($curl);
 
-                $io->text('FACEBOOK API URL: ' . $fbUrl);
-                $io->note('FACEBOOK API RESPONSE: ' . $response);
+                $io->text('FACEBOOK API URL: '.$fbUrl);
+                $io->note('FACEBOOK API RESPONSE: '.$response);
 
                 // END FACEBOOK TESTING
             }
@@ -178,16 +177,12 @@ class ChannelVacancySendCommand extends Command
     }
 
     /**
-     * Shorten URL using YOURLS
-     *
-     * @param string $url
-     *
-     * @return string
+     * Shorten URL using YOURLS.
      */
     private function shortenUrl(string $url): string
     {
         $signature = $this->container->getParameter('yourls_signature');
-        $api_url   = 'https://a.vacansee.xyz/yourls-api.php';
+        $api_url = 'https://a.vacansee.xyz/yourls-api.php';
 
         // Init the CURL session
         $ch = curl_init();
@@ -199,9 +194,9 @@ class ChannelVacancySendCommand extends Command
             $ch,
             CURLOPT_POSTFIELDS,
             [     // Data to POST
-                'url'       => $url,
-                'format'    => 'json',
-                'action'    => 'shorturl',
+                'url' => $url,
+                'format' => 'json',
+                'action' => 'shorturl',
                 'signature' => $signature,
             ]
         );

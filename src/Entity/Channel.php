@@ -14,7 +14,7 @@ use Doctrine\ORM\Mapping as ORM;
 class Channel
 {
     /**
-     * Channels to be inserted to db
+     * Channels to be inserted to db.
      */
     public const CHANNELS = [
         // channelId => category slug

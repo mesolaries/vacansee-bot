@@ -22,8 +22,8 @@ class VacancyRepository extends ServiceEntityRepository
 
     public function findVacancyIdByGotDateAndChannel(\DateTime $date, Channel $channel)
     {
-        $from = new \DateTime($date->format("Y-m-d") . " 00:00:00");
-        $to = new \DateTime($date->format("Y-m-d") . " 23:59:59");
+        $from = new \DateTime($date->format('Y-m-d').' 00:00:00');
+        $to = new \DateTime($date->format('Y-m-d').' 23:59:59');
 
         return $this->createQueryBuilder('v')
             ->select('v.vacancyId')

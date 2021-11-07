@@ -2,7 +2,6 @@
 
 namespace App\Service\Bot;
 
-
 use App\Entity\Chat;
 use App\Service\Api\Vacansee;
 use Doctrine\ORM\EntityManagerInterface;
@@ -59,6 +58,7 @@ class CommandService
      * @param $message
      *
      * @return Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -69,7 +69,7 @@ class CommandService
     public function start($message)
     {
         $text =
-            sprintf(ReplyMessages::GREETING . "\n\n" . ReplyMessages::CATEGORY_QUESTION, $message->from->first_name);
+            sprintf(ReplyMessages::GREETING."\n\n".ReplyMessages::CATEGORY_QUESTION, $message->from->first_name);
 
         $keyboard = $this->generateCategoriesInlineKeyboard();
 
@@ -80,6 +80,7 @@ class CommandService
      * @param $message
      *
      * @return Message
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      */
@@ -89,10 +90,10 @@ class CommandService
     }
 
     /**
-     * @param      $message
-     * @param int  $page
+     * @param $message
      *
      * @return bool|Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -116,7 +117,7 @@ class CommandService
         // Get vacancies from cache by page
         $vacancies = $this->getVacancies($categoryId, $page);
 
-        if (count($vacancies) == 0) {
+        if (0 == count($vacancies)) {
             return $this->bot->sendMessage($telegramChatId, ReplyMessages::NO_VACANCIES, 'HTML');
         }
 
@@ -140,6 +141,7 @@ class CommandService
      * @param $message
      *
      * @return Message
+     *
      * @throws ClientExceptionInterface
      * @throws Exception
      * @throws InvalidArgumentException
@@ -160,6 +162,7 @@ class CommandService
      * @param $message
      *
      * @return Message
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      */
@@ -172,6 +175,7 @@ class CommandService
      * @param $message
      *
      * @return Message
+     *
      * @throws Exception
      * @throws InvalidArgumentException
      */
@@ -181,16 +185,14 @@ class CommandService
     }
 
     /**
-     * @param int $categoryId
-     * @param int $page
-     *
      * @return mixed
+     *
      * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getVacancies(int $categoryId, int $page)
     {
         return $this->cache->get(
-            'app.vacancies.' . $categoryId . '.' . $page,
+            'app.vacancies.'.$categoryId.'.'.$page,
             function (ItemInterface $item) use ($categoryId, $page) {
                 $item->expiresAfter(3600);
 
@@ -199,8 +201,8 @@ class CommandService
                         [
                             'itemsPerPage' => 1,
                             'page' => $page,
-                            'createdAt[before]' => date("Y-m-d"),
-                            'createdAt[after]' => date("Y-m-d", strtotime("-1 week")),
+                            'createdAt[before]' => date('Y-m-d'),
+                            'createdAt[after]' => date('Y-m-d', strtotime('-1 week')),
                             'order[id]' => 'desc',
                         ]
                     );
@@ -211,10 +213,10 @@ class CommandService
                     [
                         'itemsPerPage' => 1,
                         'page' => $page,
-                        'createdAt[before]' => date("Y-m-d"),
+                        'createdAt[before]' => date('Y-m-d'),
                         'createdAt[after]' => date(
-                            "Y-m-d",
-                            strtotime("-1 week")
+                            'Y-m-d',
+                            strtotime('-1 week')
                         ),
                         'order[id]' => 'desc',
                     ]
@@ -227,12 +229,13 @@ class CommandService
      * @param $vacancy
      *
      * @return mixed
+     *
      * @throws \Psr\Cache\InvalidArgumentException
      */
     public function getCategoryName($vacancy)
     {
         return $this->cache->get(
-            'app.category.' . str_replace('/', '', $vacancy->category),
+            'app.category.'.str_replace('/', '', $vacancy->category),
             function (ItemInterface $item) use ($vacancy) {
                 $item->expiresAfter(3600 * 24);
 
@@ -243,6 +246,7 @@ class CommandService
 
     /**
      * @return InlineKeyboardMarkup
+     *
      * @throws ClientExceptionInterface
      * @throws RedirectionExceptionInterface
      * @throws ServerExceptionInterface
@@ -260,10 +264,10 @@ class CommandService
                 $buttons[$row][] =
                     [
                         'text' => $category->name,
-                        'callback_data' => json_encode(['command' => 'save_user_category', 'id' => $category->id])
+                        'callback_data' => json_encode(['command' => 'save_user_category', 'id' => $category->id]),
                     ];
             }
-            $row++;
+            ++$row;
         }
 
         $buttons[$row][] =
@@ -275,24 +279,21 @@ class CommandService
     }
 
     /**
-     * @param      $vacancy
-     * @param int  $page
-     * @param bool $expanded
+     * @param $vacancy
      *
      * @return InlineKeyboardMarkup
      */
     public static function generateVacancyInlineKeyboard($vacancy, int $page, bool $expanded = false)
     {
         $toggleDetailsButton = [
-            'text' => "Ətraflı",
-            'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id, 'page' => $page])
+            'text' => 'Ətraflı',
+            'callback_data' => json_encode(['command' => 'read_more', 'id' => $vacancy->id, 'page' => $page]),
         ];
-
 
         if ($expanded) {
             $toggleDetailsButton = [
-                'text' => "Bağla",
-                'callback_data' => json_encode(['command' => 'read_less', 'id' => $vacancy->id, 'page' => $page])
+                'text' => 'Bağla',
+                'callback_data' => json_encode(['command' => 'read_less', 'id' => $vacancy->id, 'page' => $page]),
             ];
         }
 
@@ -302,18 +303,18 @@ class CommandService
                     $toggleDetailsButton,
                 ],
                 [
-                    ['text' => "Mənbə", 'url' => $vacancy->url],
+                    ['text' => 'Mənbə', 'url' => $vacancy->url],
                 ],
                 [
                     [
-                        'text' => "⬅️ Əvvəlki",
-                        'callback_data' => json_encode(['command' => 'prev', 'page' => ($page - 1)])
+                        'text' => '⬅️ Əvvəlki',
+                        'callback_data' => json_encode(['command' => 'prev', 'page' => ($page - 1)]),
                     ],
                     [
-                        'text' => "Növbəti ➡️",
-                        'callback_data' => json_encode(['command' => 'next', 'page' => ($page + 1)])
+                        'text' => 'Növbəti ➡️',
+                        'callback_data' => json_encode(['command' => 'next', 'page' => ($page + 1)]),
                     ],
-                ]
+                ],
             ]
         );
     }
