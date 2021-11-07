@@ -65,7 +65,7 @@ class ChannelVacancyGetCommand extends Command
                 continue;
             }
 
-            $now = new \DateTime();
+            $now = new \DateTime('-1 day');
 
             if ($channel->getCategorySlug()) {
                 $newVacancies =
