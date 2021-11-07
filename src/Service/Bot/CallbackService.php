@@ -224,6 +224,8 @@ class CallbackService
                     )
                 );
 
+            $vacancy_description = preg_replace('/[\r\n\t]{2,}/', "\n\n", $vacancy_description);
+
             $text =
                 sprintf(
                     ReplyMessages::VACANCY.ReplyMessages::VACANCY_DESCRIPTION,
