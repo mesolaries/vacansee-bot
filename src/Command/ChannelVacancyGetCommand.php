@@ -76,22 +76,22 @@ class ChannelVacancyGetCommand extends Command
                 continue;
             }
 
-            $now = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
-            $now->setTimezone(new \DateTimeZone('UTC'));
+            $today = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
+            $today->setTimezone(new \DateTimeZone('UTC'));
 
             if ($channel->getCategorySlug()) {
                 $newVacancies =
                     $this->api->getVacanciesByCategorySlug(
                         $channel->getCategorySlug(),
                         [
-                            'createdAt[after]' => $now->format('Y-m-d H:i'),
+                            'createdAt[after]' => $today->format('Y-m-d H:i'),
                         ]
                     );
             } else {
                 $newVacancies =
                     $this->api->getVacancies(
                         [
-                            'createdAt[after]' => $now->format('Y-m-d H:i'),
+                            'createdAt[after]' => $today->format('Y-m-d H:i'),
                         ]
                     );
             }

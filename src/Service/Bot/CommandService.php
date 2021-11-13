@@ -196,13 +196,20 @@ class CommandService
             function (ItemInterface $item) use ($categoryId, $page) {
                 $item->expiresAfter(3600);
 
+                $now = new \DateTime('now', new \DateTimeZone('Asia/Baku'));
+                $now->setTimezone(new \DateTimeZone('UTC'));
+
+                $aWeekBefore = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
+                $aWeekBefore->setTimezone(new \DateTimeZone('UTC'));
+                $aWeekBefore->modify('-1 week');
+
                 if (!$categoryId) {
                     return $this->api->getVacancies(
                         [
                             'itemsPerPage' => 1,
                             'page' => $page,
-                            'createdAt[before]' => date('Y-m-d'),
-                            'createdAt[after]' => date('Y-m-d', strtotime('-1 week')),
+                            'createdAt[before]' => $now->format('Y-m-d H:i'),
+                            'createdAt[after]' => $aWeekBefore->format('Y-m-d H:i'),
                             'order[id]' => 'desc',
                         ]
                     );
@@ -213,11 +220,8 @@ class CommandService
                     [
                         'itemsPerPage' => 1,
                         'page' => $page,
-                        'createdAt[before]' => date('Y-m-d'),
-                        'createdAt[after]' => date(
-                            'Y-m-d',
-                            strtotime('-1 week')
-                        ),
+                        'createdAt[before]' => $now->format('Y-m-d H:i'),
+                        'createdAt[after]' => $aWeekBefore->format('Y-m-d H:i'),
                         'order[id]' => 'desc',
                     ]
                 );
