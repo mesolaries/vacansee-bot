@@ -11,6 +11,10 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 
 class ChannelVacancyGetCommand extends Command
 {
@@ -41,6 +45,13 @@ class ChannelVacancyGetCommand extends Command
             );
     }
 
+    /**
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     * @throws RedirectionExceptionInterface
+     * @throws ClientExceptionInterface
+     * @throws \Exception
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
@@ -65,21 +76,22 @@ class ChannelVacancyGetCommand extends Command
                 continue;
             }
 
-            $now = new \DateTime();
+            $now = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
+            $now->setTimezone(new \DateTimeZone('UTC'));
 
             if ($channel->getCategorySlug()) {
                 $newVacancies =
                     $this->api->getVacanciesByCategorySlug(
                         $channel->getCategorySlug(),
                         [
-                            'createdAt[after]' => $now->format('Y-m-d'),
+                            'createdAt[after]' => $now->format('Y-m-d H:i'),
                         ]
                     );
             } else {
                 $newVacancies =
                     $this->api->getVacancies(
                         [
-                            'createdAt[after]' => $now->format('Y-m-d'),
+                            'createdAt[after]' => $now->format('Y-m-d H:i'),
                         ]
                     );
             }
