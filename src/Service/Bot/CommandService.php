@@ -243,7 +243,7 @@ class CommandService
             function (ItemInterface $item) use ($vacancy) {
                 $item->expiresAfter(3600 * 24);
 
-                return str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancy->category)->name));
+                return str_replace(' ', '', ucwords($vacancy->category->name));
             }
         );
     }

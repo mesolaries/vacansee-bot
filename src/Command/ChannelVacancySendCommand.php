@@ -105,7 +105,7 @@ class ChannelVacancySendCommand extends Command
             $vacancyResource = $this->api->getVacancy($vacancy->getVacancyId());
 
             $categoryName =
-                str_replace(' ', '', ucwords($this->api->getResourceByUri($vacancyResource->category)->name));
+                str_replace(' ', '', ucwords($vacancyResource->category->name));
 
             $salary = $vacancyResource->salary ?: 'Qeyd edilməyib';
 
