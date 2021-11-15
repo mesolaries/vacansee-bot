@@ -14,6 +14,12 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Contracts\HttpClient\Exception\ClientExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\RedirectionExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
+use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
+use TelegramBot\Api\Exception;
+use TelegramBot\Api\InvalidArgumentException;
 use TelegramBot\Api\Types\Inline\InlineKeyboardMarkup;
 
 class ChannelVacancySendCommand extends Command
@@ -57,6 +63,14 @@ class ChannelVacancySendCommand extends Command
         ;
     }
 
+    /**
+     * @throws InvalidArgumentException
+     * @throws RedirectionExceptionInterface
+     * @throws Exception
+     * @throws ClientExceptionInterface
+     * @throws TransportExceptionInterface
+     * @throws ServerExceptionInterface
+     */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);

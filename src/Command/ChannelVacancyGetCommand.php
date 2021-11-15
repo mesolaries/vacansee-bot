@@ -59,6 +59,16 @@ class ChannelVacancyGetCommand extends Command
         $channelIds = $input->getOption('channel');
 
         $channelRepository = $this->em->getRepository(Channel::class);
+        $vacancyRepository = $this->em->getRepository(Vacancy::class);
+
+        $today = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
+        $today->setTimezone(new \DateTimeZone('UTC'));
+
+        $newVacancies = $this->api->getVacancies(
+            [
+                'createdAt[after]' => $today->format('Y-m-d H:i'),
+            ]
+        );
 
         foreach ($channelIds as $channelId) {
             $io->note("Working with $channelId channel");
@@ -76,35 +86,20 @@ class ChannelVacancyGetCommand extends Command
                 continue;
             }
 
-            $today = new \DateTime('today midnight', new \DateTimeZone('Asia/Baku'));
-            $today->setTimezone(new \DateTimeZone('UTC'));
-
-            if ($channel->getCategorySlug()) {
-                $newVacancies =
-                    $this->api->getVacanciesByCategorySlug(
-                        $channel->getCategorySlug(),
-                        [
-                            'createdAt[after]' => $today->format('Y-m-d H:i'),
-                        ]
-                    );
-            } else {
-                $newVacancies =
-                    $this->api->getVacancies(
-                        [
-                            'createdAt[after]' => $today->format('Y-m-d H:i'),
-                        ]
-                    );
-            }
-
-            $vacancyRepository = $this->em->getRepository(Vacancy::class);
-
-            $newVacanciesCount = count($newVacancies);
+            $newVacanciesCount = 0;
 
             foreach ($newVacancies as $newVacancy) {
-                if ($vacancyRepository->findOneBy(['vacancyId' => $newVacancy->id, 'channel' => $channel])) {
-                    --$newVacanciesCount;
+                $channelCategorySlug = Channel::CHANNELS[$channelId];
+
+                if (null !== $channelCategorySlug && $channelCategorySlug !== $newVacancy->category->slug) {
                     continue;
                 }
+
+                if ($vacancyRepository->findOneBy(['vacancyId' => $newVacancy->id, 'channel' => $channel])) {
+                    continue;
+                }
+
+                ++$newVacanciesCount;
 
                 $vacancy = new Vacancy();
                 $vacancy->setChannel($channel);
