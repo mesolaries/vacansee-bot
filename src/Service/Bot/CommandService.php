@@ -124,8 +124,7 @@ class CommandService
         // Get a vacancy
         $vacancy = $vacancies[0];
 
-        // Get the category name from cache
-        $categoryName = $this->getCategoryName($vacancy);
+        $categoryName = $vacancy->category->name;
 
         $salary = $vacancy->salary ?: 'Qeyd edilməyib';
 
@@ -225,25 +224,6 @@ class CommandService
                         'order[id]' => 'desc',
                     ]
                 );
-            }
-        );
-    }
-
-    /**
-     * @param $vacancy
-     *
-     * @return mixed
-     *
-     * @throws \Psr\Cache\InvalidArgumentException
-     */
-    public function getCategoryName($vacancy)
-    {
-        return $this->cache->get(
-            'app.category.'.str_replace('/', '', $vacancy->category),
-            function (ItemInterface $item) use ($vacancy) {
-                $item->expiresAfter(3600 * 24);
-
-                return str_replace(' ', '', ucwords($vacancy->category->name));
             }
         );
     }

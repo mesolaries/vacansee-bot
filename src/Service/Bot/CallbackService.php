@@ -207,8 +207,7 @@ class CallbackService
 
         $salary = $vacancy->salary ?: 'Qeyd edilməyib';
 
-        // Get the category name from cache
-        $categoryName = $this->botCommand->getCategoryName($vacancy);
+        $categoryName = $vacancy->category->name;
 
         $keyboard = $this->botCommand::generateVacancyInlineKeyboard($vacancy, $page, $expand);
 
@@ -284,8 +283,7 @@ class CallbackService
         // Get a vacancy
         $vacancy = $vacancies[0];
 
-        // Get the category name from cache
-        $categoryName = $this->botCommand->getCategoryName($vacancy);
+        $categoryName = $vacancy->category->name;
 
         $salary = $vacancy->salary ?: 'Qeyd edilməyib';
 
